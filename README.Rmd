@@ -1,0 +1,23 @@
+---
+output: pal::gitlab_document
+---
+
+# `r paste0(pal::desc_value("Package"), ": ", pal::desc_value("Title"))`
+
+`r pal::desc_value("Description")`
+
+## Installation
+```{r, install-snippet-dev, child = pkgsnippets::snippet_path("installation-notice_dev-version_gitlab.Rmd")}
+```
+
+## Development
+
+### Literate Programming
+```{r, literate-programming-snippet, child = pkgsnippets::snippet_path("rmd-package-notice.Rmd")}
+```
+
+### Coding Style
+```{r, coding-style-snippet, child = pkgsnippets::snippet_path("coding-style-notice.Rmd")}
+```
+
+---

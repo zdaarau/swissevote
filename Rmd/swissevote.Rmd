@@ -10,7 +10,33 @@ editor_options:
 cf. <https://github.com/tidyverse/magrittr/issues/29#issuecomment-74313262>
 
 ```{r}
-utils::globalVariables(names = c("."))
+utils::globalVariables(names = c(".",
+                                 "aaData",
+                                 "Abstimmungs_Datum",
+                                 "Abstimmungs_Text",
+                                 "convert_canton_names",
+                                 "is_cantonal",
+                                 "is_election",
+                                 "is_election_date",
+                                 "is_federal",
+                                 "is_municipal",
+                                 "level",
+                                 "limited_to_cantons",
+                                 "link",
+                                 "municipality",
+                                 "Name_Politische_Ebene",
+                                 "proposal_nrs",
+                                 "subject",
+                                 "subject_summary",
+                                 "Termin",
+                                 "Titel der Vorlage",
+                                 "type",
+                                 "V1",
+                                 "V2",
+                                 "V3",
+                                 "V5",
+                                 "V6",
+                                 "V7"))
 ```
 
 ## Constants

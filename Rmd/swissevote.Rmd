@@ -445,11 +445,12 @@ get_neuchatel_cantonal_vote_dates <- function(council_of_states = FALSE,
                          replacement = "\\1 \\4\\2") %>%
     stringr::str_split(pattern = " - (?=\\d+?\\.\\d+?.\\d+?$)",
                        simplify = TRUE) %>%
+    magrittr::set_colnames(c("subject", "date")) %>%
     tibble::as_tibble() %>%
-    dplyr::transmute(date = lubridate::dmy(V2),
-                     is_election = stringr::str_detect(string = V1,
+    dplyr::transmute(date = lubridate::dmy(date),
+                     is_election = stringr::str_detect(string = subject,
                                                        pattern = "(?i)^election"),
-                     subject = V1)
+                     subject = subject)
   
   # incorporate latest vote dates (separate page)
   vote_dates %<>% dplyr::bind_rows(vote_dates_latest_neuchatel() %>%

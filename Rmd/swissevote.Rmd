@@ -51,6 +51,63 @@ Define the regular expression to detect indirect counterproposals and tie-breake
 regex_counterproposal_fr <- "(?i)(co?n?tre-?projet(?!\\s(direct|relatif))|question\\ssubsidiaire)"
 ```
 
+## Get municipalities that occured in the data so far
+
+TODO: Replace hardcoded municipalities by a generic solution.
+
+```{r}
+municipalities <- function(canton = c("Geneva", "Neuchatel", "Zurich")) {
+  
+  switch(EXPR = rlang::arg_match(canton),
+         "Geneva" = c("Ani\\u00e8res",
+                      "Cologny",
+                      "Carouge",
+                      "Meyrin",
+                      "Vandoeuvres",
+                      "Collonge-Bellerive",
+                      "Onex",
+                      "Versoix",
+                      "Bernex",
+                      "Ch\\u00eane-Bourg",
+                      "Grand-Saconnex",
+                      "Lancy",
+                      "Th\\u00f4nex",
+                      "Vernier",
+                      "Perly-Certoux",
+                      "Plan-les-Ouates",
+                      "Ch\\u00eane-Bougeries",
+                      "Avusy",
+                      "Aire-la-Ville",
+                      "Troinex",
+                      "Avully",
+                      "Bardonnex",
+                      "Bellevue",
+                      "Cartigny",
+                      "C\\u00e9ligny",
+                      "Chancy",
+                      "Choulex",
+                      "Collex-Bossy",
+                      "Confignon",
+                      "Corsier",
+                      "Dardagny",
+                      "Gen\\u00e8ve",
+                      "Genthod",
+                      "Gy",
+                      "Hermance",
+                      "Jussy",
+                      "Laconnex",
+                      "Meinier",
+                      "Pregny-Chamb\\u00e9sy",
+                      "Presinge",
+                      "Puplinge",
+                      "Russin",
+                      "Satigny",
+                      "Soral",
+                      "Veyrier"),
+         rlang::abort("Not implemented yet."))
+}
+```
+
 # Get vote dates from the authorities' websites
 
 **Remarks:**

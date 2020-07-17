@@ -1,6 +1,6 @@
 Package: swissevote
-Title: Provides functions around the Swiss e-voting trial
-    data collected by the Centre for Democracy Studies Aarau (ZDA).
+Title: Provides Functions Around the Swiss E-Voting Trial Data
+    Collected by the Centre for Democracy Studies Aarau (ZDA)
 Version: 0.0.9000
 Authors@R: 
     person(given = "Salim",
@@ -19,7 +19,10 @@ BugReports: https://gitlab.com/zdaarau/swissevote/issues
 Imports: 
     checkmate (>= 2.0.0),
     dplyr (>= 1.0.0),
+    httr (>= 1.4.1),
+    jsonlite (>= 1.7.0),
     lubridate (>= 1.7.9),
+    magrittr (>= 1.5),
     pal (>= 0.0.9003),
     pkgpins (>= 0.1.0),
     purrr (>= 0.3.4),

@@ -19,6 +19,7 @@ BugReports: https://gitlab.com/zdaarau/swissevote/issues
 Imports: 
     checkmate (>= 2.0.0),
     dplyr (>= 1.0.0),
+    glue (>= 1.4.1),
     httr (>= 1.4.1),
     jsonlite (>= 1.7.0),
     lubridate (>= 1.7.9),

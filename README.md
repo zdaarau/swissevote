@@ -1,4 +1,4 @@
-# swissevote: Provides functions around the Swiss e-voting trial data collected by the Centre for Democracy Studies Aarau (ZDA).
+# swissevote: Provides Functions Around the Swiss E-Voting Trial Data Collected by the Centre for Democracy Studies Aarau (ZDA)
 
 swissevote provides functions to parse cantonal voting register data, to scrape authority websites for ballot data as well as other auxiliary functions around the Swiss e-voting trial data collected by the Centre for Democracy Studies Aarau (ZDA).
 

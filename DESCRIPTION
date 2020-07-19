@@ -33,10 +33,12 @@ Imports:
     stringr (>= 1.4.0),
     tibble (>= 3.0.2),
     tidyr (>= 1.1.0),
-    xml2 (>= 1.3.2)
+    xml2 (>= 1.3.2),
+    swissmuni (>= 0.2.2)
 Remotes:
     gitlab::salim_b/r/pkgs/pal,
-    gitlab::salim_b/r/pkgs/pkgpins
+    gitlab::salim_b/r/pkgs/pkgpins,
+    gitlab::salim_b/r/pkgs/swissmuni
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

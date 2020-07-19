@@ -14,28 +14,71 @@ utils::globalVariables(names = c(".",
                                  "aaData",
                                  "Abstimmungs_Datum",
                                  "Abstimmungs_Text",
+                                 "all_of",
+                                 "ballot_votes_e_voting_electorate",
+                                 "ballot_votes_total",
+                                 "canton",
+                                 "cantonal_elected_power",
+                                 "cantonal_election_procedure",
+                                 "combined_elected_power",
+                                 "combined_election_procedure",
+                                 "combined_level",
+                                 "comments",
+                                 "country",
+                                 "district",
+                                 "election_level",
+                                 "ends_with",
+                                 "e_votes",
+                                 "e_voting_electorate",
+                                 "federal_elected_power",
+                                 "federal_election_procedure",
+                                 "group",
+                                 "InitialCode",
                                  "is_cantonal",
+                                 "is_cross_vote_aggregated",
                                  "is_election",
                                  "is_election_date",
+                                 "is_entire_group_in_all_votes",
                                  "is_federal",
+                                 "is_matched_group",
                                  "is_municipal",
+                                 "is_preregistration_required",
+                                 "is_wassenaar_corrected",
                                  "level",
                                  "limited_to_cantons",
                                  "link",
+                                 "matched_group_notes",
+                                 "matches",
+                                 "municipal_elected_power",
+                                 "municipal_election_procedure",
                                  "municipality",
+                                 "MutationDate",
+                                 "MutationNumber",
                                  "Name_Politische_Ebene",
+                                 "nr_of_cantonal_referendums",
+                                 "nr_of_federal_referendums",
+                                 "nr_of_municipal_referendums",
+                                 "postal_votes_e_voting_electorate",
+                                 "postal_votes_total",
                                  "proposal_nrs",
+                                 "referendum_level",
+                                 "starts_with",
                                  "subject",
                                  "subject_summary",
+                                 "starts_with",
                                  "Termin",
+                                 "TerminalCode",
                                  "Titel der Vorlage",
+                                 "total_electorate",
                                  "type",
                                  "V1",
                                  "V2",
                                  "V3",
                                  "V5",
                                  "V6",
-                                 "V7"))
+                                 "V7",
+                                 "vote_count_e_voting_electorate",
+                                 "vote_count_total"))
 ```
 
 ## Constants
@@ -129,6 +172,274 @@ municipalities <- function(canton = c("Geneva", "Neuchatel", "Zurich")) {
                       "Soral",
                       "Veyrier"),
          rlang::abort("Not implemented yet."))
+}
+```
+
+## Convert codes
+
+TODO: Get rid of the `*_code_*` vars altogether and transform the fns below to convert strings/factors
+
+### Determine combination of three-code variables (`combined_election_procedure`)
+
+```{r}
+#' Determine combination of three-code variables (`combined_election_procedure`)
+#'
+#' @param ... Up to three individual codes as integers. `pkgsnip::roxy_label("dyn_dots_support")`
+#'
+#' @return An integer scalar.
+determine_3_code_combo <- function(...) {
+  
+  input_codes <-
+    rlang::list2(...) %>%
+    purrr::flatten_dbl() %>%
+    as.integer()
+  
+  combined_code <- NA_integer_
+  
+  # show warning if all three codes are NA
+  if (all(is.na(input_codes))) {
+    
+    rlang::warn("`combined_code` couldn't be determined because all codes are `NA`!")
+    
+  } else {
+    
+    # define a vector of all codes excluding NAs
+    all_codes <- input_codes[!is.na(input_codes)]
+    
+    # if all codes are the same, just assign the first one
+    if (length(unique(all_codes)) == 1L) {
+      
+      combined_code <- all_codes[1L]
+      
+      # else combined code must be 3
+    } else combined_code <- 3L
+  }
+  
+  combined_code
+}
+```
+
+### Determine combination of seven-code variables (like `combined_level`)
+
+```{r}
+#' Determine combination of seven-code variables (like `combined_level`)
+#'
+#' @param ... Up to three individual codes as integers. `pkgsnip::roxy_label("dyn_dots_support")`
+#'
+#' @return An integer scalar.
+determine_7_code_combo <- function(...) {
+  
+  input_codes <-
+    rlang::list2(...) %>%
+    purrr::flatten_dbl() %>%
+    as.integer()
+  
+  combined_code <- NA_integer_
+  
+  # show warning if all three codes are NA
+  if (all(is.na(input_codes))) {
+    
+    rlang::warn("`combined_code` couldn't be determined because all codes are `NA`!")
+    
+  } else {
+    
+    # define a vector of all codes excluding NAs and 0s
+    all_codes <- input_codes %>% magrittr::extract(!is.na(.) & !(. == 0L))
+    
+    # if `all_codes` is empty, return 0
+    if (length(all_codes) == 0L) {
+      
+      combined_code <- 0L
+      
+      # if all codes are the same, just assign the first one
+    } else if (length(unique(all_codes)) == 1L) {
+      
+      combined_code <- all_codes[1L]
+      
+      # handle remaining combinations
+    } else {
+      
+      combined_code <- dplyr::case_when(7L %in% all_codes
+                                        | all(all_codes > 3L)
+                                        | all(c(1L, 6L) %in% all_codes)
+                                        | all(c(2L, 5L) %in% all_codes)
+                                        | all(c(3L, 4L) %in% all_codes)
+                                        | all(c(1L, 2L, 3L) %in% all_codes)
+                                        | all(c(1L, 4L, 5L) %in% all_codes) ~ 7L,
+                                        all(all_codes %in% c(2L, 3L, 6L)) ~ 6L,
+                                        all(all_codes %in% c(1L, 3L, 5L)) ~ 5L,
+                                        all(all_codes %in% c(1L, 2L, 4L)) ~ 4L)
+    }
+  }
+  
+  combined_code
+}
+```
+
+### Determine `combined_elected_power`
+
+```{r}
+combine_elected_powers <- function(federal_elected_power = NA,
+                                   cantonal_elected_power = NA,
+                                   municipal_elected_power = NA) {
+  
+  combined_elected_power <-
+    determine_7_code_combo(
+      # convert federal_elected_power code to schema of cantonal/municipal_elected_power
+      dplyr::if_else(federal_elected_power > 0L,
+                     1L,
+                     as.integer(federal_elected_power)),
+      cantonal_elected_power,
+      municipal_elected_power
+    )
+  
+  combined_elected_power
+}
+```
+
+### Combine group code
+
+```{r}
+combine_group <- function(...) {
+  
+  input_codes <-
+    rlang::list2(...) %>%
+    purrr::flatten_dbl() %>%
+    as.integer()
+  
+  combined_code <- NA_integer_
+  
+  # show warning if all three codes are NA
+  if (all(is.na(input_codes))) {
+    
+    rlang::warn("`combined_code` couldn't be determined because all codes are `NA`!")
+    
+  } else {
+    
+    # define a vector of all codes excluding NAs and 0s
+    all_codes <- input_codes %>% magrittr::extract(!is.na(.) & !(. == 0L))
+    
+    # if `all_codes` is empty, return 0
+    if (length(all_codes) == 0L) {
+      
+      combined_code <- 0L
+      
+      # if all codes are the same, just assign the first one
+    } else if (length(unique(all_codes)) == 1L) {
+      
+      combined_code <- all_codes[1L]
+      
+      # handle remaining combinations
+    } else {
+      
+      combined_code <- dplyr::case_when(6L %in% all_codes
+                                        | all(c(2L, 5L) %in% all_codes)
+                                        | all(c(3L, 4L) %in% all_codes)
+                                        | all(c(4L, 5L) %in% all_codes)
+                                        | all(c(1L, 2L, 3L) %in% all_codes) ~ 6L,
+                                        all(all_codes %in% c(1L, 3L, 5L)) ~ 5L,
+                                        all(all_codes %in% c(1L, 2L, 4L)) ~ 4L)
+    }
+    
+    combined_code
+  }
+}
+```
+
+### Convert `group` code to `group_name`
+
+```{r}
+get_group_name <- function(group) {
+  
+  switch(EXPR = as.character(group),
+         "1" = "Swiss citizens living in Switzerland" ,
+         "2" = "Swiss citizens living abroad" ,
+         "3" = "foreigners" ,
+         "4" = "Swiss citizens living in Switzerland & Swiss citizens living abroad" ,
+         "5" = "Swiss citizens living in Switzerland & foreigners" ,
+         "6" = "Swiss citizens living in Switzerland & Swiss citizens living abroad & foreigners",
+         NA_character_)
+}
+```
+
+### Convert `type` code to `type_name`
+
+```{r}
+get_type_name <- function(type) {
+  
+  switch(EXPR = as.character(type),
+         "1" = "referendum" ,
+         "2" = "election" ,
+         "3" = "both (referendum & election)",
+         NA_character_)
+}
+```
+
+### Convert `*_level` code to name(s)
+
+```{r}
+get_level_name <- function(level) {
+  
+  switch(EXPR = as.character(level),
+         "0" = "none",
+         "1" = "federal only",
+         "2" = "cantonal only",
+         "3" = "municipal only",
+         "4" = "federal & cantonal",
+         "5" = "federal & municipal",
+         "6" = "cantonal & municipal",
+         "7" = "all three (federal & cantonal & municipal)",
+         NA_character_)
+}
+```
+
+### Convert `federal_elected_power` code to `federal_elected_power_name`
+
+```{r}
+get_federal_elected_power_name <- function(federal_elected_power) {
+  
+  switch(EXPR = as.character(federal_elected_power),
+         "0" = "none",
+         "1" = "legislature (National Council)" ,
+         "2" = "legislature (Council of States)" ,
+         "3" = "legislature (National Council & Council of States)",
+         NA_character_)
+}
+```
+
+### Convert `*_elected_power` code to name(s)
+
+This does _not_ apply to `federal_elected_power`!
+
+```{r}
+get_elected_power_name <- function(elected_power) {
+  
+  switch(EXPR = as.character(elected_power),
+         "0" = "none",
+         "1" = "legislature",
+         "2" = "executive",
+         "3" = "judiciary",
+         "4" = c("legislature", "executive"),
+         "5" = c("legislature", "judiciary"),
+         "6" = c("executive", "judiciary"),
+         "7" = c("legislature", "executive", "judiciary"),
+         NA_character_) %>%
+    purrr::when(is.na(.) ~ .,
+                ~ paste0(collapse = " & "))
+}
+```
+
+### Convert `*_election_procedure` codes to names
+
+```{r}
+get_election_procedure_name <- function(election_procedure) {
+  
+  switch(EXPR = as.character(election_procedure),
+         "0" = "none",
+         "1" = "proportional voting" ,
+         "2" = "majority voting" ,
+         "3" = "proportional voting & majority voting",
+         NA_character_)
 }
 ```
 
@@ -275,8 +586,8 @@ vote_dates_federal <- function(source = c("Neuchatel", "Zurich"),
                                cache_lifespan = "1 day") {
   
   pkgpins::with_cache(
-    fn = function(source,
-                  exclude_counterproposals) {
+    .fn = function(source,
+                   exclude_counterproposals) {
       
       result <- switch(EXPR = source,
                        "Neuchatel" =
@@ -304,9 +615,9 @@ vote_dates_federal <- function(source = c("Neuchatel", "Zurich"),
     },
     source = rlang::arg_match(source),
     exclude_counterproposals = exclude_counterproposals,
-    use_cache = use_cache,
-    cache_lifespan = cache_lifespan,
-    pkg = pkg
+    .use_cache = use_cache,
+    .cache_lifespan = cache_lifespan,
+    .pkg = pkg
   )
 }
 ```
@@ -398,8 +709,8 @@ vote_dates_cantonal <- function(cantons = c("Geneva", "Neuchatel", "Zurich"),
                                 cache_lifespan = "1 day") {
   
   pkgpins::with_cache(
-    fn = function(cantons,
-                  exclude_counterproposals) {
+    .fn = function(cantons,
+                   exclude_counterproposals) {
       
       vote_dates <- tibble::tibble(date = lubridate::as_date(integer()),
                                    canton = character(),
@@ -457,9 +768,9 @@ vote_dates_cantonal <- function(cantons = c("Geneva", "Neuchatel", "Zurich"),
     },
     cantons = cantons,
     exclude_counterproposals = exclude_counterproposals,
-    use_cache = use_cache,
-    cache_lifespan = cache_lifespan,
-    pkg = pkg
+    .use_cache = use_cache,
+    .cache_lifespan = cache_lifespan,
+    .pkg = pkg
   )
 }
 ```
@@ -2025,5 +2336,197 @@ get_zurich_municipal_referendum_dates_zuerich <- function(exclude_counterproposa
   }
   
   referendum_dates
+}
+```
+
+# Retroactively merge municipalities that have merged
+
+```{r}
+#' Retroactively merge municipalities that have merged
+#'
+#' This function builds upon [swissmuni::mutations()] to find municipalities in `data` that have merged into another municipality and synthetically applies
+#' this merger "back in time" as best as possible. This allows subsequent data analysis to better track/compare the development of e-voting usage over time.
+#'
+#' @param data The data in which to perform the retroactive municipality mergers.
+#'
+#' @return `pkgsnip::return_label("data")`
+#' @export
+merge_municipalities <- function(data) {
+  
+  # process each *canton* individually and merge result
+  data %>%
+    dplyr::group_by(canton) %>%
+    dplyr::group_split() %>%
+    purrr::map_dfr(function(data_canton) {
+      
+      mutations <-
+        swissmuni::mutations(start_date = min(data_canton$date,
+                                              na.rm = TRUE),
+                             end_date = max(data_canton$date,
+                                            na.rm = TRUE),
+                             cache_lifespan = "1 week") %>%
+        # ensure data is ordered chronologically
+        dplyr::arrange(MutationDate)
+      
+      # extract relevant "daughter" municipality codes
+      mutations_daughters <-
+        mutations %>%
+        dplyr::filter(InitialCode %in% setdiff(data_canton$municipality_code, NA)) %>%
+        dplyr::filter(TerminalCode %in% setdiff(data_canton$municipality_code, NA))
+      
+      # terminate early if no relevant "daughter" municipality codes found
+      if (nrow(mutations_daughters)) {
+        
+        # extract relevant data (includes more rows when not all merged municipalities are present in our data)
+        mutations_relevant <- mutations %>% dplyr::filter(MutationNumber %in% mutations_daughters$MutationNumber)
+        
+        # process each *date* individually and merge result
+        data_canton %>%
+          dplyr::group_by(date) %>%
+          dplyr::group_split() %>%
+          purrr::map_dfr(function(data_canton_date) {
+            
+            # process each **municipality merger** (=MutationNumber) individually
+            mutation_nrs <-
+              mutations_relevant %>%
+              dplyr::filter(InitialCode %in% intersect(mutations_relevant$InitialCode,
+                                                       data_canton_date$municipality_code)) %$%
+              MutationNumber %>%
+              unique()
+            
+            for (mutation_nr in mutation_nrs) {
+              
+              mutations_daughter <- mutations_relevant %>% dplyr::filter(MutationNumber == mutation_nr)
+              ix_daughter <- which(data_canton_date$municipality_code %in% mutations_daughter$InitialCode)
+              
+              if (length(ix_daughter)) {
+                
+                # process each **group** individually
+                merged_rows <-
+                  data_canton_date[ix_daughter, ] %>%
+                  dplyr::group_by(group) %>%
+                  dplyr::group_split() %>%
+                  purrr::map_dfr(merge_municipalities_helper,
+                                 municipality_code_new = unique(mutations_daughter$TerminalCode),
+                                 municipality_new = unique(mutations_daughter$TerminalName),
+                                 target_colnames = colnames(data_canton_date))
+                
+                data_canton_date %<>%
+                  dplyr::filter(!(dplyr::row_number() %in% ix_daughter)) %>%
+                  dplyr::bind_rows(merged_rows)
+              }
+            }
+            
+            data_canton_date
+          })
+      } else {
+        data_canton
+      }
+    })
+}
+```
+
+## Merge municipalitites (helper)
+
+```{r}
+merge_municipalities_helper <- function(rows,
+                                        municipality_code_new,
+                                        municipality_new,
+                                        target_colnames) {
+  
+  rows %>%
+    dplyr::summarise(
+      comments = paste0("Retroactively (i.e. synthetically) merged from the municipalities ", pal::prose_ls(municipality), "; ",
+                        paste0(unique(comments),
+                               collapse = "; ")),
+      municipality_code = checkmate::assert_int(municipality_code_new),
+      municipality_code_alt = NA_integer_,
+      municipality = checkmate::assert_string(municipality_new),
+      
+      # cols which _should_ be identical
+      dplyr::across(c(country,
+                      canton,
+                      district,
+                      starts_with("system"),
+                      date,
+                      is_preregistration_required,
+                      ends_with("_overlapping_aggregate"),
+                      nr_of_federal_referendums,
+                      nr_of_cantonal_referendums),
+                    unique),
+      
+      # cols which have to be combined logically
+      ## binary
+      dplyr::across(c(is_entire_group_in_all_votes,
+                      is_cross_vote_aggregated,
+                      is_wassenaar_corrected,
+                      is_matched_group),
+                    all),
+      ## 3-code
+      dplyr::across(c(type,
+                      federal_elected_power,
+                      matches("^(federal|cantonal|municipal|combined)_election_procedure$")),
+                    determine_3_code_combo),
+      ## group (6-code)
+      group = combine_group(group),
+      ## 7-code
+      dplyr::across(c(matches("^(referendum|election|combined)_level$"),
+                      matches("^(cantonal|municipal|combined)_elected_power$")),
+                    determine_7_code_combo),
+      
+      # cols which have to be summed up
+      dplyr::across(c(e_voting_electorate,
+                      total_electorate,
+                      vote_count_e_voting_electorate,
+                      ballot_votes_e_voting_electorate,
+                      postal_votes_e_voting_electorate,
+                      vote_count_total,
+                      ballot_votes_total,
+                      postal_votes_total,
+                      e_votes),
+                    ~ dplyr::if_else(all(is.na(.x)),
+                                     NA_integer_,
+                                     sum(.x,
+                                         na.rm = TRUE))),
+      dplyr::across(c(matched_group_notes,
+                      source),
+                    ~ paste0(unique(.x),
+                             collapse = "; ")),
+      
+      # other cols
+      nr_of_municipal_referendums = max(nr_of_cantonal_referendums,
+                                        na.rm = TRUE)
+    ) %>%
+    # cols which have to be recalculated
+    dplyr::mutate(total_nr_of_referendums = sum(nr_of_federal_referendums,
+                                                nr_of_cantonal_referendums,
+                                                nr_of_municipal_referendums,
+                                                na.rm = TRUE),
+                  group_name = get_group_name(group),
+                  type_name = get_type_name(type),
+                  referendum_level_name = get_level_name(referendum_level),
+                  election_level_name = get_level_name(election_level),
+                  combined_level_name = get_level_name(combined_level),
+                  federal_elected_power_name = get_federal_elected_power_name(federal_elected_power),
+                  cantonal_elected_power_name = get_elected_power_name(cantonal_elected_power),
+                  municipal_elected_power_name = get_elected_power_name(municipal_elected_power),
+                  combined_elected_power_name = get_elected_power_name(combined_elected_power),
+                  federal_election_procedure_name = get_election_procedure_name(federal_election_procedure),
+                  cantonal_election_procedure_name = get_election_procedure_name(cantonal_election_procedure),
+                  municipal_election_procedure_name = get_election_procedure_name(municipal_election_procedure),
+                  combined_election_procedure_name = get_election_procedure_name(combined_election_procedure),
+                  
+                  turnout = vote_count_e_voting_electorate / e_voting_electorate,
+                  ballot_votes_share = ballot_votes_e_voting_electorate / vote_count_e_voting_electorate,
+                  postal_votes_share = postal_votes_e_voting_electorate / vote_count_e_voting_electorate,
+                  e_votes_share = e_votes / vote_count_e_voting_electorate,
+                  e_votes_share_total_electorate = e_votes / total_electorate,
+                  e_votes_share_e_voting_electorate = e_votes / e_voting_electorate) %>%
+    # fix col order
+    dplyr::select(all_of(target_colnames)) %>%
+    # fix name of GE municipality "La Grande Béroche" (hyphen was dropped)
+    dplyr::mutate(municipality = dplyr::if_else(municipality == "La Grande-B\u00e9roche",
+                                                "La Grande B\u00e9roche",
+                                                municipality))
 }
 ```

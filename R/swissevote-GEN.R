@@ -1961,72 +1961,83 @@ merge_municipalities <- function(data) {
   data %>%
     dplyr::group_by(canton) %>%
     dplyr::group_split() %>%
-    purrr::map_dfr(function(data_canton) {
+    purrr::map_dfr(merge_municipalities_by_canton)
+}
+
+merge_municipalities_by_canton <- function(data_canton) {
+  
+  start_date <- min(data_canton$date,
+                    na.rm = TRUE)
+  
+  end_date <- max(data_canton$date,
+                  na.rm = TRUE)
+  
+  mutations <-
+    swissmuni::mutations(start_date = start_date,
+                         end_date = end_date,
+                         cache_lifespan = "1 week") %>%
+    # ensure data is ordered chronologically
+    dplyr::arrange(MutationDate)
+  
+  # extract relevant "daughter" municipality codes
+  mutations_daughters <-
+    mutations %>%
+    dplyr::filter(InitialCode %in% setdiff(data_canton$municipality_code, NA)) %>%
+    dplyr::filter(TerminalCode %in% setdiff(data_canton$municipality_code, NA))
+  
+  # terminate early if no relevant "daughter" municipality codes found
+  if (nrow(mutations_daughters)) {
+    
+    # extract relevant data (includes more rows when not all merged municipalities are present in our data)
+    mutations_relevant <- mutations %>% dplyr::filter(MutationNumber %in% mutations_daughters$MutationNumber)
+    
+    # process each *date* individually and merge result
+    data_canton %>%
+      dplyr::group_by(date) %>%
+      dplyr::group_split() %>%
+      purrr::map_dfr(merge_municipalities_by_canton_date,
+                     mutations_relevant = mutations_relevant)
+    
+  } else {
+    data_canton
+  }
+}
+
+merge_municipalities_by_canton_date <- function(data_canton_date,
+                                                mutations_relevant) {
+  
+  # process each **municipality merger** (=MutationNumber) individually
+  mutation_nrs <-
+    mutations_relevant %>%
+    dplyr::filter(InitialCode %in% intersect(mutations_relevant$InitialCode,
+                                             data_canton_date$municipality_code)) %$%
+    MutationNumber %>%
+    unique()
+  
+  for (mutation_nr in mutation_nrs) {
+    
+    mutations_daughter <- mutations_relevant %>% dplyr::filter(MutationNumber == mutation_nr)
+    ix_daughter <- which(data_canton_date$municipality_code %in% mutations_daughter$InitialCode)
+    
+    if (length(ix_daughter)) {
       
-      mutations <-
-        swissmuni::mutations(start_date = min(data_canton$date,
-                                              na.rm = TRUE),
-                             end_date = max(data_canton$date,
-                                            na.rm = TRUE),
-                             cache_lifespan = "1 week") %>%
-        # ensure data is ordered chronologically
-        dplyr::arrange(MutationDate)
+      # process each **group** individually
+      merged_rows <-
+        data_canton_date[ix_daughter, ] %>%
+        dplyr::group_by(group) %>%
+        dplyr::group_split() %>%
+        purrr::map_dfr(merge_municipalities_helper,
+                       municipality_code_new = unique(mutations_daughter$TerminalCode),
+                       municipality_new = unique(mutations_daughter$TerminalName),
+                       target_colnames = colnames(data_canton_date))
       
-      # extract relevant "daughter" municipality codes
-      mutations_daughters <-
-        mutations %>%
-        dplyr::filter(InitialCode %in% setdiff(data_canton$municipality_code, NA)) %>%
-        dplyr::filter(TerminalCode %in% setdiff(data_canton$municipality_code, NA))
-      
-      # terminate early if no relevant "daughter" municipality codes found
-      if (nrow(mutations_daughters)) {
-        
-        # extract relevant data (includes more rows when not all merged municipalities are present in our data)
-        mutations_relevant <- mutations %>% dplyr::filter(MutationNumber %in% mutations_daughters$MutationNumber)
-        
-        # process each *date* individually and merge result
-        data_canton %>%
-          dplyr::group_by(date) %>%
-          dplyr::group_split() %>%
-          purrr::map_dfr(function(data_canton_date) {
-            
-            # process each **municipality merger** (=MutationNumber) individually
-            mutation_nrs <-
-              mutations_relevant %>%
-              dplyr::filter(InitialCode %in% intersect(mutations_relevant$InitialCode,
-                                                       data_canton_date$municipality_code)) %$%
-              MutationNumber %>%
-              unique()
-            
-            for (mutation_nr in mutation_nrs) {
-              
-              mutations_daughter <- mutations_relevant %>% dplyr::filter(MutationNumber == mutation_nr)
-              ix_daughter <- which(data_canton_date$municipality_code %in% mutations_daughter$InitialCode)
-              
-              if (length(ix_daughter)) {
-                
-                # process each **group** individually
-                merged_rows <-
-                  data_canton_date[ix_daughter, ] %>%
-                  dplyr::group_by(group) %>%
-                  dplyr::group_split() %>%
-                  purrr::map_dfr(merge_municipalities_helper,
-                                 municipality_code_new = unique(mutations_daughter$TerminalCode),
-                                 municipality_new = unique(mutations_daughter$TerminalName),
-                                 target_colnames = colnames(data_canton_date))
-                
-                data_canton_date %<>%
-                  dplyr::filter(!(dplyr::row_number() %in% ix_daughter)) %>%
-                  dplyr::bind_rows(merged_rows)
-              }
-            }
-            
-            data_canton_date
-          })
-      } else {
-        data_canton
-      }
-    })
+      data_canton_date %<>%
+        dplyr::filter(!(dplyr::row_number() %in% ix_daughter)) %>%
+        dplyr::bind_rows(merged_rows)
+    }
+  }
+  
+  data_canton_date
 }
 
 merge_municipalities_helper <- function(rows,

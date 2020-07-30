@@ -456,7 +456,9 @@ get_election_procedure_name <- function(election_procedure) {
 }
 ```
 
-# Convert between full canton names and their two-letter abbreviations
+# Utilities
+
+## Convert between full canton names and their two-letter abbreviations
 
 ```{r}
 #' Convert between full canton names and their two-letter abbreviations

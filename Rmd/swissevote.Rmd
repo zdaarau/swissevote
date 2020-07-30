@@ -5,6 +5,19 @@ editor_options:
 
 # INTERNAL
 
+## Package load/unload
+
+```{r}
+.onUnload <- function (libpath) {
+  pkgpins::deregister(pkg = pkg)
+}
+
+.onLoad <- function(libname, pkgname) {
+  pkgpins::clear(max_age = getOption("swissevote.global_cache_lifespan",
+                                     default = "30 days"))
+}
+```
+
 ## Avoid `R CMD check` notes about undefined global objects used in magrittr pipes
 
 cf. <https://github.com/tidyverse/magrittr/issues/29#issuecomment-74313262>

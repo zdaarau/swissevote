@@ -9,12 +9,20 @@ editor_options:
 
 ```{r}
 .onUnload <- function (libpath) {
+  
   pkgpins::deregister(pkg = pkg)
 }
 
 .onLoad <- function(libname, pkgname) {
-  pkgpins::clear(max_age = getOption("swissevote.global_cache_lifespan",
+  
+  pkgpins::clear(pkg = pkgname,
+                 max_age = getOption("swissevote.global_cache_lifespan",
                                      default = "30 days"))
+  
+  # set local path to Google Drive folder dependent on username
+  options(swissevote.path_raw_data = switch(EXPR = Sys.info()[["user"]],
+                                            "salim" = "~/Arbeit/ZDA/Google Drive/edc-projekt/iVoting_dataset/Datenquellen/",
+                                            NULL))
 }
 ```
 

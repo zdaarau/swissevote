@@ -19,6 +19,7 @@ BugReports: https://gitlab.com/zdaarau/swissevote/issues
 Depends: 
     R (>= 3.5.0)
 Imports: 
+    assertr (>= 2.7),
     checkmate (>= 2.0.0),
     dplyr (>= 1.0.0),
     fs (>= 1.4.2),

@@ -1,4 +1,4 @@
-date,ballot_type,is_federal,is_cantonal,is_municipal,is_e_voting_available,electorate,notes,filename
+ballot_date,ballot_type,is_federal,is_cantonal,is_municipal,is_e_voting_available,electorate,notes,filename
 1992-09-27,referendum,TRUE,TRUE,FALSE,FALSE,202069,NA,v199240
 1992-12-06,referendum,TRUE,FALSE,TRUE,FALSE,202561,Commune de Grand-Saconnex,v199250
 1993-03-07,referendum,TRUE,TRUE,FALSE,FALSE,203409,NA,v199310

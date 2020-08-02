@@ -22,18 +22,26 @@ utils::globalVariables(names = c(".",
                                  "aaData",
                                  "Abstimmungs_Datum",
                                  "Abstimmungs_Text",
+                                 "agerevolu",
                                  "all_of",
+                                 "annee",
                                  "ballot_votes_e_voting_electorate",
                                  "ballot_votes_total",
                                  "canton",
                                  "cantonal_elected_power",
                                  "cantonal_election_procedure",
+                                 "cec",
+                                 "cnat",
                                  "combined_elected_power",
                                  "combined_election_procedure",
                                  "combined_level",
                                  "comments",
                                  "country",
+                                 "country_canton_code",
+                                 "datvot",
                                  "district",
+                                 "district_code",
+                                 "dnaisaa",
                                  "election_level",
                                  "ends_with",
                                  "e_votes",
@@ -47,10 +55,13 @@ utils::globalVariables(names = c(".",
                                  "is_election",
                                  "is_election_date",
                                  "is_entire_group_in_all_votes",
+                                 "is_e_voting_available",
                                  "is_federal",
+                                 "is_foreigner",
                                  "is_matched_group",
                                  "is_municipal",
                                  "is_preregistration_required",
+                                 "is_swiss_living_abroad",
                                  "is_wassenaar_corrected",
                                  "level",
                                  "limited_to_cantons",
@@ -60,16 +71,22 @@ utils::globalVariables(names = c(".",
                                  "municipal_elected_power",
                                  "municipal_election_procedure",
                                  "municipality",
+                                 "municipality_code_2_digits",
                                  "MutationDate",
                                  "MutationNumber",
                                  "Name_Politische_Ebene",
+                                 "n",
                                  "nr_of_cantonal_referendums",
                                  "nr_of_federal_referendums",
                                  "nr_of_municipal_referendums",
                                  "postal_votes_e_voting_electorate",
                                  "postal_votes_total",
                                  "proposal_nrs",
+                                 "qualcan",
+                                 "qualcom",
+                                 "qualfed",
                                  "referendum_level",
+                                 "sexe",
                                  "starts_with",
                                  "subject",
                                  "subject_summary",
@@ -79,12 +96,17 @@ utils::globalVariables(names = c(".",
                                  "Titel der Vorlage",
                                  "total_electorate",
                                  "type",
+                                 "typvot",
                                  "V1",
                                  "V2",
                                  "V3",
                                  "V5",
                                  "V6",
                                  "V7",
+                                 "void_since",
+                                 "votarr",
+                                 "votcom",
+                                 "votcorr",
                                  "vote_count_e_voting_electorate",
                                  "vote_count_total"))
 
@@ -117,7 +139,23 @@ path_raw_data <- function(...,
   
   fs::path(getOption("swissevote.path_raw_data"), ...,
            ext = ext) %>%
-    fs::path_real()
+    fs::path_abs()
+}
+
+filetype_data_raw <- function(file_path,
+                              file_type_precedence = c("csv", "zip", "xlsx")) {
+  
+  filename <- fs::path_file(file_path)
+  dir <- fs::path_dir(file_path)
+  
+  dir %>%
+    fs::dir_ls(type = "file",
+               glob = fs::path(dir, paste0(filename, "*"))) %>%
+    fs::path_ext() %>%
+    match(table = file_type_precedence) %>%
+    sort() %>%
+    dplyr::first() %>%
+    {file_type_precedence[.]}
 }
 
 municipalities <- function(canton = c("Geneva", "Neuchatel", "Zurich")) {
@@ -430,109 +468,118 @@ convert_canton_names <- function(cantons) {
   converted_names
 }
 
+#' Read in raw data files of a specific Swiss canton
+#'
+#' @param canton The canton of which to read in raw data files.
+#' @param ballot_date The ballot date of which to read in raw data files.
+#' @param specific_datasets If not `NULL`, only the specified filenames will be processed. A list with vote dates as keys and character vectors of specific
+#'   filenames (without the filetype extension) as values. Setting `specific_datasets` is only sensible in case of `canton = "Geneva"` and thus ignored
+#'   otherwise.
+#'
+#' @return In case of `canton = "Geneva"`, a list with a tibble for each raw data file plus a metadata tibble. Otherwise a single tibble.
+#' @export
 read_raw_data <- function(canton = c("Bern", "Geneva", "Neuchatel"),
-                          date,
+                          ballot_date,
                           specific_datasets = NULL) {
   
   data_raw <- switch(EXPR = rlang::arg_match(canton),
-                     "Bern" = read_raw_data_bern(date = date),
-                     "Geneva" = read_raw_data_geneva(date = date,
+                     "Bern" = read_raw_data_bern(ballot_date = ballot_date),
+                     "Geneva" = read_raw_data_geneva(ballot_date = ballot_date,
                                                      specific_datasets = specific_datasets),
-                     "Neuchatel" = read_raw_data_neuchatel(date = date))
+                     "Neuchatel" = read_raw_data_neuchatel(ballot_date = ballot_date))
   
   data_raw
 }
 
-read_raw_data_bern <- function(date) {
+read_raw_data_bern <- function(ballot_date) {
   
   # assemble partial file path
-  file_path <- path_raw_data(glue::glue("BE/BE_{date}"))
+  file_path <- path_raw_data(glue::glue("BE/BE_{ballot_date}"))
   
   # determine file type
-  file_type <- dplyr::case_when(file.exists(paste0(file_path, ".csv")) ~ "csv",
-                                file.exists(paste0(file_path, ".zip")) ~ "zip",
-                                file.exists(paste0(file_path, ".xlsx")) ~ "xlsx",
-                                TRUE ~ "NA")
-  
-  # complete file path
-  file_path %<>% paste0(".", file_type)
+  file_type <- filetype_data_raw(file_path = file_path)
   
   # read in data
-  if (file_type == "xlsx") {
+  if (is.na(file_type)) {
     
-    data_raw <- readxl::read_excel(path = file_path,
+    # if file couldn't be found, print a warning and return an empty dataframe
+    rlang::warn(glue::glue("File {file_path} neither found in XLSX nor in CSV or ZIP format!"))
+    
+    data_raw <- tibble::tibble()
+    
+  } else if (file_type == "xlsx") {
+    
+    data_raw <- readxl::read_excel(path = fs::path(file_path,
+                                                   ext = file_type),
                                    col_names = c("variable", "value"),
                                    col_types = c("text", "numeric"),
                                    skip = 0L)
     
-  } else if (file_type != "NA") {
+  } else {
     
-    data_raw <- readr::read_delim(file = file_path,
+    data_raw <- readr::read_delim(file = fs::path(file_path,
+                                                   ext = file_type),
                                   col_names = c("variable", "value"),
                                   col_types = "cn",
-                                  locale = locale(encoding = "UTF-8",
-                                                  decimal_mark = "."),
+                                  locale = readr::locale(encoding = "UTF-8",
+                                                         decimal_mark = "."),
                                   delim = ",",
                                   trim_ws = TRUE,
                                   skip = 0L)
-  } else {
-    
-    # if file couldn't be found, print a warning and return an empty dataframe
-    rlang::warn("File ", file_path, " neither found in XLSX nor in CSV or ZIP format!")
-    
-    data_raw <- tibble::tibble()
   }
   
   data_raw
 }
 
-read_raw_data_geneva <- function(date,
+#' Read in raw data files from the canton of Geneva
+#'
+#' @inheritParams read_raw_data
+#' @param specific_datasets If not `NULL`, only the specified filenames will be processed. A list with vote dates as keys and character vectors of specific
+#'   filenames (without the filetype extension) as values.
+#' @param check_municipalities Check if `municipality` could be determined for all entries excluding Swiss living abroad. A logical scalar.
+#' @param remove_duplicated_votes Remove duplicate votes (where `votcorr == "A"`; only if the necessary variable exists). The variable `votcorr` is used to
+#'   identify voters for whom several voting cards have been issued (due to non-receipt, loss, etc.). The cases with `votcorr = "A"` have to be filtered out in
+#'   order to get correct results. A logical scalar.
+#' @param remove_unknown_municipality_district_combos Ignore rows in raw data that are _not_ Swiss abroad but missing a `municipality` (usually with the
+#'   undocumented district code `99`). A logical scalar.
+#' @param remove_NA_locality_codes Ignore rows in raw data that have no `municipality_code_2_digits` set (`NA`). A logical scalar.
+#' @param skip_problematic_dates Skip `ballot_date`s for which unresolved parsing problems exist. A logical scalar.
+#'
+#' @return A list with a tibble of each raw data file plus metadata tibble.
+read_raw_data_geneva <- function(ballot_date,
+                                 specific_datasets = NULL,
                                  check_municipalities = TRUE,
-                                 remove_unknown_municipality_district_combos = remove_unknown_GE_municipality_district_combos,
-                                 remove_NA_locality_codes = remove_GE_NA_locality_codes,
-                                 remove_duplicated_votes = remove_duplicated_GE_votes,
-                                 skip_problematic_dates = skip_problematic_GE_dates,
-                                 specific_datasets = NULL) {
+                                 remove_duplicated_votes = TRUE,
+                                 remove_unknown_municipality_district_combos = FALSE,
+                                 remove_NA_locality_codes = FALSE,
+                                 skip_problematic_dates = FALSE) {
   
   # get filename(s) of Geneva dataset(s)
   filenames <-
-    metadata_raw_geneva %>%
-    dplyr::filter(date == !!date
+    metadata_geneva_raw_datasets %>%
+    dplyr::filter(ballot_date == !!ballot_date
                   & is_e_voting_available
                   & !is.na(filename)) %$%
     filename
   
   # take `specific_datasets` into account
-  if (!is.null(specific_datasets)
+  if (!is.null(specific_datasets[[ballot_date]])
       & length(filenames)) {
     
-    constrained_dates <-
-      specific_datasets %>%
-      magrittr::extract2("Geneva") %>%
-      unlist(recursive = FALSE) %>%
-      names()
-    
-    if (date %in% constrained_dates) {
-      
-      specific_datasets %<>%
-        magrittr::extract2("Geneva") %>%
-        magrittr::extract2(date)
-      
-      filenames %<>% .[filenames %in% specific_datasets]
-    }
+    filenames %<>% .[filenames %in% specific_datasets[[ballot_date]]]
   }
   
   # print a warning if some files are missing (filename = ?)
-  if (metadata_raw_geneva %>%
-      dplyr::filter(date == !!date
-             & is_e_voting_available) %$%
+  if (metadata_geneva_raw_datasets %>%
+      dplyr::filter(ballot_date == !!ballot_date
+                    & is_e_voting_available) %$%
       filename %>%
       is.na() %>%
       which() %>%
       length() %>%
       magrittr::is_greater_than(0L)) {
     
-    rlang::warn(glue::glue("There are raw data files missing for Geneva @ {date}! Check `swissevote:::metadata_raw_geneva`."))
+    rlang::warn(glue::glue("There are raw data files missing for Geneva @ {ballot_date}! Check `swissevote:::metadata_geneva_raw_datasets`."))
   }
   
   # read in table with codes and names of municipalities and districts
@@ -557,9 +604,9 @@ read_raw_data_geneva <- function(date,
   
   ## skip them all
   if (skip_problematic_dates &
-      date %in% problematic_dates) {
+      ballot_date %in% problematic_dates) {
     
-    rlang::warn(glue::glue("Skipped processing data from {date} due to unresolved issues."))
+    rlang::warn(glue::glue("Skipped processing data from {ballot_date} due to unresolved issues."))
     
   } else {
     
@@ -572,12 +619,12 @@ read_raw_data_geneva <- function(date,
     
     for (filename in filenames) {
       
-      metadata_raw_geneva_subset <-
-        metadata_raw_geneva %>%
-        dplyr::filter(date == !!date
+      metadata_geneva_raw_datasets_subset <-
+        metadata_geneva_raw_datasets %>%
+        dplyr::filter(ballot_date == !!ballot_date
                       & filename == !!filename) %T>%
         {checkmate::assert_true(x = nrow(.) == 1L,
-                                .var.name = "nrow(metadata_raw_geneva_subset) == 1L")}
+                                .var.name = "nrow(metadata_geneva_raw_datasets_subset) == 1L")}
       
       data_raw <- read_raw_dataset_geneva(filename = filename,
                                           check_municipalities = check_municipalities,
@@ -592,9 +639,9 @@ read_raw_data_geneva <- function(date,
         data_raw_list[[filename]] <- data_raw
         
         metadata %<>% tibble::add_row(file = filename,
-                                      incl_federal = metadata_raw_geneva_subset$is_federal,
-                                      incl_cantonal = metadata_raw_geneva_subset$is_cantonal,
-                                      incl_municipal = metadata_raw_geneva_subset$is_municipal)
+                                      incl_federal = metadata_geneva_raw_datasets_subset$is_federal,
+                                      incl_cantonal = metadata_geneva_raw_datasets_subset$is_cantonal,
+                                      incl_municipal = metadata_geneva_raw_datasets_subset$is_municipal)
       }
     }
     
@@ -615,19 +662,8 @@ read_raw_dataset_geneva <- function(filename,
   # assemble partial file path
   file_path <- path_raw_data("GE", filename)
   
-  # determine file type
-  ## prefer CSV > ZIP > XLSX
-  file_type_precedence <- c("csv", "zip", "xlsx")
-  
-  file_type <-
-    fs::path_dir(file_path) %>%
-    fs::dir_ls(type = "file",
-               glob = paste0(file_path, "*")) %>%
-    fs::path_ext() %>%
-    match(table = file_type_precedence) %>%
-    sort() %>%
-    dplyr::first() %>%
-    {file_type_precedence[.]}
+  # determine file type (prefer CSV > ZIP > XLSX)
+  file_type <- filetype_data_raw(file_path = file_path)
   
   # read in data
   ## if file couldn't be found, print a warning and return an empty tibble
@@ -701,23 +737,15 @@ read_raw_dataset_geneva <- function(filename,
   # add binary variable `is_swiss_living_abroad`
   ## check if there are entries with no `municipality_code_2_digits` (`NA`)
   ### get number of affected entries
-  nr_of_NA_municipality_code_2_digits <-
-    is.na(data_raw$municipality_code_2_digits) %>%
-    which() %>%
-    length()
+  nr_of_NA_municipality_code_2_digits <- length(which(is.na(data_raw$municipality_code_2_digits)))
   
   if (nr_of_NA_municipality_code_2_digits > 0L) {
+    
     ### print an informative warning
-    warning(
-      style_warn(paste0("\n", nr_of_NA_municipality_code_2_digits, " of a total of ", nrow(data_raw),
-                        " entries in the raw Geneva data file ", style_var_value(filename), " have no ",
-                        style_var_name("municipality_code_2_digits"), " set (", style_arg_invalid("NA"), ")!",
-                        dplyr::if_else(condition = remove_NA_locality_codes,
-                                true = " They have been removed.\n",
-                                false = "\n"))),
-      call. = FALSE,
-      immediate. = TRUE
-    )
+    rlang::warn(glue::glue("{nr_of_NA_municipality_code_2_digits} of a total of {nrow(data_raw)} entries in the raw Geneva data file {filename} have no ",
+                           "`municipality_code_2_digits` set (`NA`)!", dplyr::if_else(remove_NA_locality_codes,
+                                                                                      " They have been removed.",
+                                                                                      "")))
     
     if (remove_NA_locality_codes) {
       
@@ -732,28 +760,19 @@ read_raw_dataset_geneva <- function(filename,
   # add binary variable `is_foreigner`
   ## check if there are entries with no `country_canton_code` (`NA`)
   ### get number of affected entries
-  nr_of_NA_country_canton_code <-
-    is.na(data_raw$country_canton_code) %>%
-    which() %>%
-    length()
+  nr_of_NA_country_canton_code <- length(which(is.na(data_raw$country_canton_code)))
   
   if (nr_of_NA_country_canton_code > 0L) {
     
     ### print an informative warning
-    warning(
-      style_warn(paste0("\n", nr_of_NA_country_canton_code, " of a total of ", nrow(data_raw),
-                        " entries in the raw Geneva data file ", style_var_value(filename), " have no ",
-                        style_var_name("country_canton_code"), " set (", style_arg_invalid("NA"), ")!",
-                        dplyr::if_else(condition = remove_NA_locality_codes,
-                                true = " They have been removed.\n",
-                                false = "\n"))),
-      call. = FALSE,
-      immediate. = TRUE
-    )
+    rlang::warn(glue::glue("{nr_of_NA_country_canton_code} of a total of {nrow(data_raw)} entries in the raw Geneva data file {filename} have no ",
+                           "`country_canton_code` set (`NA`)!", dplyr::if_else(remove_NA_locality_codes,
+                                                                               " They have been removed.",
+                                                                               "")))
     
+    ### remove affected entries
     if (remove_NA_locality_codes) {
       
-      ### remove affected entries
       data_raw %<>% dplyr::filter(!is.na(country_canton_code))
     }
   }
@@ -765,16 +784,15 @@ read_raw_dataset_geneva <- function(filename,
   ### get all indices of municipalities with only one district code (excl. Swiss abroad)
   affected_indices <-
     data_raw %>%
-    dplyr::filter(municipality_code_2_digits != 46L) %>%
+    dplyr::filter(municipality_code_2_digits != 46L & district_code != 0L) %>%
     dplyr::select(municipality_code_2_digits, district_code) %>%
     unique() %>%
-    dplyr::filter(district_code != 0L) %>%
     dplyr::group_by(municipality_code_2_digits) %>%
-    dplyr::summarise(n = n(),
-              .groups = "drop") %>%
+    dplyr::summarise(n = dplyr::n(),
+                     .groups = "drop") %>%
     dplyr::filter(n == 1L) %$%
     municipality_code_2_digits %>%
-    is_in(data_raw$municipality_code_2_digits, .) %>%
+    magrittr::is_in(data_raw$municipality_code_2_digits, .) %>%
     which()
   
   ### get the district codes of the affected entries
@@ -783,14 +801,8 @@ read_raw_dataset_geneva <- function(filename,
   ### replace `1` with `0` and print a warning about it
   if (length(affected_indices) > 0L) {
     
-    warning(style_warn("\nThere were " %+% paste(length(affected_indices)) %+%
-                         " entries in the raw Geneva data file " %+% filename %+%
-                         " that had a \"wrong\" district code set. They have been fixed.\n" %+%
-                         "The wrong district codes included the following numbers: " %+%
-                         paste0(style_var_value(affected_district_codes),
-                                collapse = ", ") %+% "\n"),
-            call. = FALSE,
-            immediate. = TRUE)
+    rlang::warn(glue::glue("There were {length(affected_indices)} entries in the raw Geneva data file {filename} that had a \"wrong\" district code set. ",
+                           "They have been fixed.\nThe wrong district codes included the following numbers: ", pal::prose_ls(affected_district_codes)))
     
     data_raw$district_code[affected_indices] <- 0L
   }
@@ -798,58 +810,40 @@ read_raw_dataset_geneva <- function(filename,
   data_raw %<>%
     dplyr::left_join(y = municipality_district_codes_and_names,
                      by = c("municipality_code_2_digits", "district_code")) %>%
+    # we can simply ignore `void_since` because all `municipality_code_2_digits`-`district_code` combos are unique anyway
     dplyr::select(-void_since)
   
   # check if `municipality` could be determined for all entries excl. Swiss living abroad
-  if ( check_municipalities )
-  {
+  if (check_municipalities) {
+    
     ## determine entries missing a municipality (mostly with the undocumented district code `99`)
     unknown_municipality_district_combos <-
       data_raw %>%
       dplyr::filter(!is_swiss_living_abroad
              & is.na(municipality))
     
-    if ( nrow(unknown_municipality_district_combos) > 0L )
-    {
+    if (nrow(unknown_municipality_district_combos)) {
+      
+      ## TODO: get rid of this assignment once we're certain we're properly handling unknown combos.
       ## save missing municipalities to global environment
-      assign(
-        x =
-          paste0("unknown_municipality_district_combos_GE_", filename),
-        value =
-          data_raw %>%
-          dplyr::filter(!is_swiss_living_abroad
-                 & is.na(municipality)),
-        pos =
-          globalenv()
-      )
+      assign(x = paste0("unknown_municipality_district_combos_GE_", filename),
+             value = data_raw %>% dplyr::filter(!is_swiss_living_abroad
+                                                & is.na(municipality)),
+             pos = globalenv())
       
       ## print a warning with some hints
-      warning(
-        style_warn(
-          "\nFor " %+% as.character(nrow(unknown_municipality_district_combos)) %+% " of a total of " %+%
-            as.character(nrow(data_raw)) %+% " entries in the raw Geneva data file ", style_var_value(filename) %+%
-            " no matching municipality could be found! This can either be due to flaws/errors in the data or because " %+%
-            style_var_value("GE_municipality_district_codes_and_names.csv") %+% " needs an update." %+%
-            dplyr::if_else(condition = remove_unknown_municipality_district_combos,
-                           true = " The affected entries have been removed. To inspect them",
-                           false = " To inspect the affected entries") %+% ", enter: " %+%
-            style_prompt("View(unknown_municipality_district_combos_GE_", filename, ")") %+%
-            "\n\nThe affected entries show the following combinations of " %+% style_var_name("municipality_code_2_digits") %+%
-            " and " %+% style_var_name("district_code") %+% ":\n\n    " %+%
-            # determine affected combinations of `municipality_code_2_digits` and `district_code`
-            {
-              unknown_municipality_district_combos %>%
-                dplyr::select(municipality_code_2_digits, district_code) %>%
-                dplyr::arrange(municipality_code_2_digits, district_code) %>%
-                unique() %>%
-                capture.output() %>%
-                magrittr::extract(-1L) %>%
-                paste(collapse = "\n    ")
-            } %+% "\n"
-        ),
-        call. = FALSE,
-        immediate. = TRUE
-      )
+      rlang::warn(glue::glue("For {nrow(unknown_municipality_district_combos)} of a total of {nrow(data_raw)} entries in the raw Geneva data file {filename} ",
+                             "no matching municipality could be found! This can either be due to flaws/errors in the data or because ",
+                             "`metadata_geneva_raw_datasets` needs an update.", dplyr::if_else(remove_unknown_municipality_district_combos,
+                                                                                               " The affected entries have been removed. To inspect them",
+                                                                                               " To inspect the affected entries"),
+                             ", enter: `View(unknown_municipality_district_combos_GE_{filename})`\n\n",
+                             "The affected entries show the following combinations of `municipality_code_2_digits` and `district_code`:\n\n    ",
+                             unknown_municipality_district_combos %>%
+                               dplyr::select(municipality_code_2_digits, district_code) %>%
+                               dplyr::arrange(municipality_code_2_digits, district_code) %>%
+                               unique() %>%
+                               pal::pipe_table(strong_colnames = FALSE)))
       
       ## remove unknown municipalities
       if (remove_unknown_municipality_district_combos) {
@@ -863,146 +857,118 @@ read_raw_dataset_geneva <- function(filename,
   data_raw
 }
 
-read_raw_data_neuchatel <- function(date) {
+read_raw_data_neuchatel <- function(ballot_date) {
   
-  # define column names and types depending on date
-  if (lubridate::year(date) < 2016) {
+  # define column names and types depending on `ballot_date`
+  if (lubridate::year(ballot_date) < 2016L) {
     
-    variable_names <- c("municipality",
-                        "age",
-                        "date",
-                        "sex",
-                        "vote_channel",
-                        "vote_date",
-                        "nr_of_voters",
-                        "nr_of_votes",
-                        "is_swiss_living_abroad",
-                        "nationality_code",
-                        "nationality")
+    col_names_types <- tibble::tribble(
+      
+      ~name,                    ~type,
+      "municipality",           "text",
+      "age",                    "numeric",
+      "date",                   "date",
+      "sex",                    "text",
+      "vote_channel",           "text",
+      "vote_date",              "date",
+      "nr_of_voters",           "numeric",
+      "nr_of_votes",            "numeric",
+      "is_swiss_living_abroad", "logical",
+      "nationality_code",       "numeric",
+      "nationality",            "text"
+    )
     
-    variable_types <- c("text",
-                        "numeric",
-                        "date",
-                        "text",
-                        "text",
-                        "date",
-                        "numeric",
-                        "numeric",
-                        "logical",
-                        "numeric",
-                        "text")
+    col_types_csv <- "cicccciilic"
     
-    variable_types_csv <- "cicccciilic"
+  } else {
     
-  } else  {
+    col_names_types <- tibble::tribble(
+      
+      ~name,                    ~type,
+      "age",                    "numeric",
+      "municipality",           "text",
+      "date",                   "date",
+      "sex",                    "text",
+      "vote_channel",           "text",
+      "vote_date",              "date",
+      "nr_of_voters",           "numeric",
+      "nr_of_votes",            "numeric",
+      "is_swiss_living_abroad", "logical",
+      "nationality_code",       "numeric",
+      "nationality",            "text"
+    )
     
-    variable_names <- c("age",
-                        "municipality",
-                        "date",
-                        "sex",
-                        "vote_channel",
-                        "vote_date",
-                        "nr_of_voters",
-                        "nr_of_votes",
-                        "is_swiss_living_abroad",
-                        "nationality_code",
-                        "nationality")
-    
-    variable_types <- c("numeric",
-                        "text",
-                        "date",
-                        "text",
-                        "text",
-                        "date",
-                        "numeric",
-                        "numeric",
-                        "logical",
-                        "numeric",
-                        "text")
-    
-    variable_types_csv <- "iccccciilic"
+    col_types_csv <- "iccccciilic"
   }
   
   # assemble partial file path
-  file_path <- path_raw_data(glue::glue("NE/NE_{date}"))
+  file_path <- path_raw_data(glue::glue("NE/NE_{ballot_date}"))
   
   # determine file type
-  file_type <- dplyr::case_when(file.exists(paste0(file_path, ".csv")) ~ "csv",
-                                file.exists(paste0(file_path, ".zip")) ~ "zip",
-                                file.exists(paste0(file_path, ".xlsx")) ~ "xlsx",
-                                TRUE ~ "NA")
+  file_type <- filetype_data_raw(file_path = file_path)
   
   # complete file path
   file_path %<>% paste0(".", file_type)
   
   # read in data
-  if (file_type == "xlsx") {
+  if (is.na(file_type)) {
     
-    data_raw <- readxl::read_excel(path = file_path,
-                                   col_names = variable_names,
-                                   col_types = variable_types,
-                                   skip = 1L)
-    
-  } else if ( file_type != "NA" )
-  {
-    data_raw <- readr::read_csv(file = file_path,
-                                col_names = variable_names,
-                                col_types = variable_types_csv,
-                                trim_ws = TRUE,
-                                skip = 1L)
-  } else
-  {
-    # if file couldn't be found, print a warning and return an empty dataframe
-    warning(style_warn("\nFile " %+% style_var_value(file_path) %+% " neither found in XLSX nor in CSV or ZIP format!\n"),
-            call. = FALSE,
-            immediate. = TRUE)
+    # if file couldn't be found, print a warning and return an empty tibble
+    rlang::warn(glue::glue("File {file_path} neither found in XLSX nor in CSV or ZIP format!"))
     
     return(tibble::tibble())
+    
+  } else if (file_type == "xlsx") {
+    
+    data_raw <- readxl::read_excel(path = file_path,
+                                   col_names = col_names_types$name,
+                                   col_types = col_names_types$type,
+                                   skip = 1L)
+    
+  } else {
+    
+    data_raw <- readr::read_csv(file = file_path,
+                                col_names = col_names_types$name,
+                                col_types = col_types_csv,
+                                trim_ws = TRUE,
+                                skip = 1L)
   }
   
   # delete obsolete NA columns
   data_raw <- data_raw[, 1:11]
   
   # ensure header line isn't mistakenly included (happens when file contains surplus rows at the beginning)
-  if ( data_raw %>%
-       as.matrix() %>%
-       .[!is.na(.)] %>%
-       stringr::str_detect(pattern = "(?i)(ele (libellé|sexe|)|car mode votation)") %>%
-       any() )
-  {
-    stop(style_error("\nThe NE data file " %+% style_var_value(file_path) %+% " seems to contain empty surplus rows at the beginning!\n" %+%
-                       "Please remove them and try again."),
-         call. = FALSE)
+  if (data_raw %>%
+      as.matrix() %>%
+      .[!is.na(.)] %>%
+      stringr::str_detect(pattern = "(?i)(ele (libell\u00e9|sexe|)|car mode votation)") %>%
+      any()) {
+    
+    rlang::abort(glue::glue("The NE data file {file_path} seems to contain empty surplus rows at the beginning! Please remove them and try again."))
   }
   
   # add binary variable `is_foreigner`
-  data_raw$is_foreigner <-
-    dplyr::case_when(is.na(data_raw$nationality) ~ NA,
-                     data_raw$nationality == "Suisse" ~ FALSE,
-                     TRUE ~ TRUE)
+  data_raw$is_foreigner <- dplyr::case_when(is.na(data_raw$nationality) ~ NA,
+                                            data_raw$nationality == "Suisse" ~ FALSE,
+                                            TRUE ~ TRUE)
   
   # check for missing nationalities
-  if ( any(is.na(data_raw$is_foreigner)) )
-  {
-    warning(style_warn(paste0("\nFound ", style_var_value(is.na(data_raw$is_foreigner) %>% which() %>% length()),
-                              " entries in raw data lacking a nationality (", style_arg_invalid("NA"),
-                              ")! Please double-check raw data from ", style_var_value(date), ".")),
-            call. = FALSE,
-            immediate. = TRUE)
+  if (any(is.na(data_raw$is_foreigner))) {
+    
+    rlang::warn(glue::glue("Found ", length(which(is.na(data_raw$is_foreigner))), " entries in raw data lacking a nationality (`NA`)! Please double-check ",
+                           "raw data from {ballot_date}."))
   }
   
   # check for invalid data
-  if ( data_raw %>%
-       dplyr::filter(is_foreigner & is_swiss_living_abroad) %>%
-       nrow() %>%
-       magrittr::is_greater_than(0L) )
-  {
-    stop(style_error("\nFound Swiss abroad data entry in raw data with nationality other than " %+% style_var_value("Suisse") %+%
-                       "! Please double-check data."),
-         call. = FALSE)
+  if (data_raw %>%
+      dplyr::filter(is_foreigner & is_swiss_living_abroad) %>%
+      nrow() %>%
+      magrittr::is_greater_than(0L)) {
+    
+    rlang::abort("Found Swiss abroad data entry in raw data with nationality other than Suisse! Please double-check data.")
   }
   
-  return(data_raw)
+  data_raw
 }
 
 vote_dates_latest_neuchatel <- function() {
@@ -1206,12 +1172,10 @@ vote_dates_cantonal <- function(cantons = c("Geneva", "Neuchatel", "Zurich"),
       for (canton in cantons) {
         
         # print warning ...
-        switch(
-          EXPR = canton,
-          # ... about missing ZH election dates
-          "Zurich" = rlang::warn("For the Canton of ", canton,
-                                 " only referendum dates can be scraped. The cantonal election dates have to be gathered by hand.")
-        )
+        switch(EXPR = canton,
+               # ... about missing ZH election dates
+               "Zurich" = rlang::warn(glue::glue("For the canton of {canton} only referendum dates can be scraped. The cantonal election dates have to be ",
+                                                 "gathered by hand.")))
         
         if (canton %in% c("Neuchatel", "Zurich")) {
           
@@ -1246,7 +1210,7 @@ vote_dates_cantonal <- function(cantons = c("Geneva", "Neuchatel", "Zurich"),
             dplyr::full_join(y = vote_dates,
                              by = colnames(vote_dates))
         } else {
-          rlang::warn("Scraping vote dates from the canton of ", canton, " hasn't been implemented yet!")
+          rlang::warn(glue::glue("Scraping vote dates from the canton of {canton} hasn't been implemented yet!"))
         }
       }
       
@@ -1331,7 +1295,7 @@ vote_dates_municipal <- function(cantons = c("Geneva", "Neuchatel", "Zurich"),
     } else {
       
       # print warning about unsupported cantons
-      rlang::warn("Scraping vote dates from the Canton of ", canton, " hasn't been implemented yet!")
+      rlang::warn(glue::glue("Scraping vote dates from the canton of {canton} hasn't been implemented yet!"))
     }
   }
   
@@ -2233,19 +2197,20 @@ get_zurich_municipal_vote_dates <- function(municipalities = NULL,
     
     if (municipality %in% unimplemented_municipalities) {
       
-      rlang::warn("Scraping vote dates from the municipality ", municipality,
-                  " hasn't been implemented yet (or isn't even possible to implement). Therefore its municipal vote dates won't be included.")
+      rlang::warn(glue::glue("Scraping vote dates from the municipality {municipality} hasn't been implemented yet (or isn't even possible to implement). ",
+                             "Therefore its municipal vote dates won't be included."))
       
     } else if (municipality %in% partially_implemented_municipalities) {
       
-      rlang::warn("Scraping vote dates from the municipality ", municipality, " is only partially implemented so far and the structure of the returned data ",
-                  "differs from the other municipalities. Therefore its municipal vote dates won't be included.")
+      rlang::warn(glue::glue("Scraping vote dates from the municipality {municipality} is only partially implemented so far and the structure of the ",
+                             "returned data differs from the other municipalities. Therefore its municipal vote dates won't be included."))
     } else {
       
       # print a warning about missing election dates from Zurich
       if (municipality == "Z\u00fcrich") {
         
-        rlang::warn("For the municipality ", municipality, " only referendum dates can be scraped. The municipal elections dates have to be gathered by hand.")
+        rlang::warn(glue::glue("For the municipality {municipality} only referendum dates can be scraped. The municipal elections dates have to be gathered ",
+                               "by hand."))
       }
       
       current_dates <- switch(EXPR = municipality,
@@ -2647,68 +2612,66 @@ merge_municipalities_helper <- function(rows,
                                         target_colnames) {
   
   rows %>%
-    dplyr::summarise(
-      comments = paste0("Retroactively (i.e. synthetically) merged from the municipalities ", pal::prose_ls(municipality), "; ",
-                        paste0(unique(comments),
-                               collapse = "; ")),
-      municipality_code = checkmate::assert_int(municipality_code_new),
-      municipality_code_alt = NA_integer_,
-      municipality = checkmate::assert_string(municipality_new),
-      
-      # cols which _should_ be identical
-      dplyr::across(c(country,
-                      canton,
-                      district,
-                      starts_with("system"),
-                      date,
-                      is_preregistration_required,
-                      ends_with("_overlapping_aggregate"),
-                      nr_of_federal_referendums,
-                      nr_of_cantonal_referendums),
-                    unique),
-      
-      # cols which have to be combined logically
-      ## binary
-      dplyr::across(c(is_entire_group_in_all_votes,
-                      is_cross_vote_aggregated,
-                      is_wassenaar_corrected,
-                      is_matched_group),
-                    all),
-      ## 3-code
-      dplyr::across(c(type,
-                      federal_elected_power,
-                      matches("^(federal|cantonal|municipal|combined)_election_procedure$")),
-                    determine_3_code_combo),
-      ## group (6-code)
-      group = combine_group(group),
-      ## 7-code
-      dplyr::across(c(matches("^(referendum|election|combined)_level$"),
-                      matches("^(cantonal|municipal|combined)_elected_power$")),
-                    determine_7_code_combo),
-      
-      # cols which have to be summed up
-      dplyr::across(c(e_voting_electorate,
-                      total_electorate,
-                      vote_count_e_voting_electorate,
-                      ballot_votes_e_voting_electorate,
-                      postal_votes_e_voting_electorate,
-                      vote_count_total,
-                      ballot_votes_total,
-                      postal_votes_total,
-                      e_votes),
-                    ~ dplyr::if_else(all(is.na(.x)),
-                                     NA_integer_,
-                                     sum(.x,
-                                         na.rm = TRUE))),
-      dplyr::across(c(matched_group_notes,
-                      source),
-                    ~ paste0(unique(.x),
-                             collapse = "; ")),
-      
-      # other cols
-      nr_of_municipal_referendums = max(nr_of_cantonal_referendums,
-                                        na.rm = TRUE)
-    ) %>%
+    dplyr::summarise(comments = paste0("Retroactively (i.e. synthetically) merged from the municipalities ", pal::prose_ls(municipality), "; ",
+                                       paste0(unique(comments),
+                                              collapse = "; ")),
+                     municipality_code = checkmate::assert_int(municipality_code_new),
+                     municipality_code_alt = NA_integer_,
+                     municipality = checkmate::assert_string(municipality_new),
+                     
+                     # cols which _should_ be identical
+                     dplyr::across(c(country,
+                                     canton,
+                                     district,
+                                     starts_with("system"),
+                                     date,
+                                     is_preregistration_required,
+                                     ends_with("_overlapping_aggregate"),
+                                     nr_of_federal_referendums,
+                                     nr_of_cantonal_referendums),
+                                   unique),
+                     
+                     # cols which have to be combined logically
+                     ## binary
+                     dplyr::across(c(is_entire_group_in_all_votes,
+                                     is_cross_vote_aggregated,
+                                     is_wassenaar_corrected,
+                                     is_matched_group),
+                                   all),
+                     ## 3-code
+                     dplyr::across(c(type,
+                                     federal_elected_power,
+                                     matches("^(federal|cantonal|municipal|combined)_election_procedure$")),
+                                   determine_3_code_combo),
+                     ## group (6-code)
+                     group = combine_group(group),
+                     ## 7-code
+                     dplyr::across(c(matches("^(referendum|election|combined)_level$"),
+                                     matches("^(cantonal|municipal|combined)_elected_power$")),
+                                   determine_7_code_combo),
+                     
+                     # cols which have to be summed up
+                     dplyr::across(c(e_voting_electorate,
+                                     total_electorate,
+                                     vote_count_e_voting_electorate,
+                                     ballot_votes_e_voting_electorate,
+                                     postal_votes_e_voting_electorate,
+                                     vote_count_total,
+                                     ballot_votes_total,
+                                     postal_votes_total,
+                                     e_votes),
+                                   ~ dplyr::if_else(all(is.na(.x)),
+                                                    NA_integer_,
+                                                    sum(.x,
+                                                        na.rm = TRUE))),
+                     dplyr::across(c(matched_group_notes,
+                                     source),
+                                   ~ paste0(unique(.x),
+                                            collapse = "; ")),
+                     
+                     # other cols
+                     nr_of_municipal_referendums = max(nr_of_cantonal_referendums,
+                                                       na.rm = TRUE)) %>%
     # cols which have to be recalculated
     dplyr::mutate(total_nr_of_referendums = sum(nr_of_federal_referendums,
                                                 nr_of_cantonal_referendums,
@@ -2736,7 +2699,7 @@ merge_municipalities_helper <- function(rows,
                   e_votes_share_e_voting_electorate = e_votes / e_voting_electorate) %>%
     # fix col order
     dplyr::select(all_of(target_colnames)) %>%
-    # fix name of GE municipality "La Grande Béroche" (hyphen was dropped)
+    # fix name of GE municipality "La Grande Beroche" (hyphen was officially dropped)
     dplyr::mutate(municipality = dplyr::if_else(municipality == "La Grande-B\u00e9roche",
                                                 "La Grande B\u00e9roche",
                                                 municipality))

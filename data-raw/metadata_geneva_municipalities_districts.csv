@@ -1,0 +1,79 @@
+void_since,municipality_code_2_digits,district_code,municipality,district
+,1,0,Aire-la-Ville,
+,2,0,Anières,
+,3,0,Avully,
+,4,0,Avusy,
+,5,0,Bardonnex,
+,6,0,Bellevue,
+,7,0,Bernex,
+,8,0,Carouge,
+,9,0,Cartigny,
+,10,0,Céligny,
+,11,0,Chancy,
+,12,1,Chêne-Bougeries,Centre
+,12,2,Chêne-Bougeries,Conches
+,13,0,Chêne-Bourg,
+,14,0,Choulex,
+,15,0,Collex-Bossy,
+,16,0,Collonge-Bellerive,
+2013-01-01,16,1,Collonge-Bellerive,Collonge
+2013-01-01,16,2,Collonge-Bellerive,Vésenaz
+,17,0,Cologny,
+,18,0,Confignon,
+,19,0,Corsier,
+,20,0,Dardagny,
+1996-01-01,20,1,Dardagny,Village
+1996-01-01,20,2,Dardagny,La Plaine
+,21,1,Genève,Cité-Rive
+,21,2,Genève,Pâquis
+,21,3,Genève,Saint-Gervais
+,21,4,Genève,Prairie – Délices
+,21,5,Genève,Eaux-Vives – Lac
+,21,6,Genève,Eaux-Vives – Frontenex
+,21,7,Genève,Florissant – Malagnou
+,21,8,Genève,Cluse – Roseraie
+,21,9,Genève,Acacias
+,21,10,Genève,Mail – Jonction
+,21,11,Genève,Servette – Grand-Pré
+,21,12,Genève,Prieuré – Sécheron
+,21,13,Genève,Saint-Jean
+,21,14,Genève,Les Crêts
+,21,15,Genève,Cropettes – Vidollet
+,21,16,Genève,Vieusseux
+,21,17,Genève,Champel
+,22,0,Genthod,
+,23,0,Grand-Saconnex,
+,24,0,Gy,
+,25,0,Hermance,
+,26,0,Jussy,
+,27,0,Laconnex,
+,28,1,Lancy,Grand-Lancy
+,28,2,Lancy,Petit-Lancy
+2005-01-01,28,3,Lancy,Palettes
+,29,0,Meinier,
+,30,0,Meyrin,
+2002-01-01,30,1,Meyrin,Village
+2002-01-01,30,2,Meyrin,Cointrin
+2002-01-01,30,3,Meyrin,De-Livron
+,31,0,Onex,
+,32,0,Perly-Certoux,
+,33,0,Plan-les-Ouates,
+,34,0,Pregny-Chambésy,
+,35,0,Presinge,
+,36,0,Puplinge,
+,37,0,Russin,
+,38,0,Satigny,
+,39,0,Soral,
+,40,0,Thônex,
+2002-01-01,40,1,Thônex,Ecole Marcelly
+2002-01-01,40,2,Thônex,Salle communale
+,41,0,Troinex,
+,42,0,Vandoeuvres,
+,43,1,Vernier,Village
+,43,2,Vernier,Châtelaine
+,43,3,Vernier,Aïre
+,43,4,Vernier,Avanchets
+,44,0,Versoix,
+,45,0,Veyrier,
+2002-01-01,45,1,Veyrier,Village
+2002-01-01,45,2,Veyrier,Pinchat

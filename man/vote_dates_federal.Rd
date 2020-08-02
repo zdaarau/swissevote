@@ -18,9 +18,9 @@ referendum dates will be returned from \code{source = "Zurich"}, election dates 
 
 \item{exclude_counterproposals}{Exclude indirect counterproposals and tie-breaker questions. A logical scalar.}
 
-\item{use_cache}{\code{pkgsnip::param_label("use_cache")}}
+\item{use_cache}{Return cached results if possible. If \code{FALSE}, results are always newly fetched regardless of \code{cache_lifespan}.}
 
-\item{cache_lifespan}{\code{pkgsnip::param_label("cache_lifespan")}}
+\item{cache_lifespan}{The duration after which cached results are refreshed (i.e. newly fetched). A valid \link[lubridate:as.duration]{lubridate duration}. Only relevant if \code{use_cache = TRUE}.}
 }
 \value{
 \code{pkgsnippets::return_label("data")}

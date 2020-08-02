@@ -475,20 +475,37 @@ convert_canton_names <- function(cantons) {
 #' @param specific_datasets If not `NULL`, only the specified filenames will be processed. A list with vote dates as keys and character vectors of specific
 #'   filenames (without the filetype extension) as values. Setting `specific_datasets` is only sensible in case of `canton = "Geneva"` and thus ignored
 #'   otherwise.
+#' @param use_cache `r pkgsnip::param_label("use_cache")`
+#' @param cache_lifespan `r pkgsnip::param_label("cache_lifespan")`
 #'
 #' @return In case of `canton = "Geneva"`, a list with a tibble for each raw data file plus a metadata tibble. Otherwise a single tibble.
 #' @export
 read_raw_data <- function(canton = c("Bern", "Geneva", "Neuchatel"),
                           ballot_date,
-                          specific_datasets = NULL) {
+                          specific_datasets = NULL,
+                          use_cache = TRUE,
+                          cache_lifespan = "7 days") {
   
-  data_raw <- switch(EXPR = rlang::arg_match(canton),
-                     "Bern" = read_raw_data_bern(ballot_date = ballot_date),
-                     "Geneva" = read_raw_data_geneva(ballot_date = ballot_date,
-                                                     specific_datasets = specific_datasets),
-                     "Neuchatel" = read_raw_data_neuchatel(ballot_date = ballot_date))
+  canton <- rlang::arg_match(canton)
   
-  data_raw
+  pkgpins::with_cache(
+    .fn = function(canton,
+                   ballot_date,
+                   specific_datasets) {
+      
+      switch(EXPR = canton,
+             "Bern" = read_raw_data_bern(ballot_date = ballot_date),
+             "Geneva" = read_raw_data_geneva(ballot_date = ballot_date,
+                                             specific_datasets = specific_datasets),
+             "Neuchatel" = read_raw_data_neuchatel(ballot_date = ballot_date))
+    },
+    canton = canton,
+    ballot_date = ballot_date,
+    specific_datasets = specific_datasets,
+    .use_cache = use_cache,
+    .cache_lifespan = cache_lifespan,
+    .pkg = pkg
+  )
 }
 
 read_raw_data_bern <- function(ballot_date) {
@@ -1041,8 +1058,8 @@ vote_dates_latest_neuchatel <- function() {
 #'   referendum dates will be returned from `source = "Zurich"`, election dates can only be scraped from `source = "Neuchatel"`. On the other hand,
 #'   `source = "Zurich"` will return referendum dates back to the 19th century, while `source = "Neuchatel"` only goes back to the turn of the millennium.
 #' @param exclude_counterproposals Exclude indirect counterproposals and tie-breaker questions. A logical scalar.
-#' @param use_cache `pkgsnip::param_label("use_cache")`
-#' @param cache_lifespan `pkgsnip::param_label("cache_lifespan")`
+#' @param use_cache `r pkgsnip::param_label("use_cache")`
+#' @param cache_lifespan `r pkgsnip::param_label("cache_lifespan")`
 #'
 #' @return `pkgsnippets::return_label("data")`
 #' @export

@@ -7,7 +7,9 @@
 read_raw_data(
   canton = c("Bern", "Geneva", "Neuchatel"),
   ballot_date,
-  specific_datasets = NULL
+  specific_datasets = NULL,
+  use_cache = TRUE,
+  cache_lifespan = "7 days"
 )
 }
 \arguments{
@@ -18,6 +20,10 @@ read_raw_data(
 \item{specific_datasets}{If not \code{NULL}, only the specified filenames will be processed. A list with vote dates as keys and character vectors of specific
 filenames (without the filetype extension) as values. Setting \code{specific_datasets} is only sensible in case of \code{canton = "Geneva"} and thus ignored
 otherwise.}
+
+\item{use_cache}{Return cached results if possible. If \code{FALSE}, results are always newly fetched regardless of \code{cache_lifespan}.}
+
+\item{cache_lifespan}{The duration after which cached results are refreshed (i.e. newly fetched). A valid \link[lubridate:as.duration]{lubridate duration}. Only relevant if \code{use_cache = TRUE}.}
 }
 \value{
 In case of \code{canton = "Geneva"}, a list with a tibble for each raw data file plus a metadata tibble. Otherwise a single tibble.

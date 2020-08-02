@@ -3,6 +3,25 @@ editor_options:
   chunk_output_type: console
 ---
 
+# NOTES
+
+## Metadata about raw Geneva data
+
+The Genevan vote register data is split among several files and oddly named. Thus we include the relevant metadata about it directly in this package. Below is
+the code to generate the internal data from the CSV file (which is only included in the source repository but no the package).
+
+```{r, purl = FALSE}
+metadata_raw_geneva <- readr::read_csv(file = "metadata_raw_geneva.csv",
+                                       col_types = "Dcllllicc")
+
+usethis::use_data(metadata_raw_geneva,
+                  internal = TRUE,
+                  overwrite = TRUE,
+                  compress = "xz",
+                  version = 3)
+```
+
+
 # INTERNAL
 
 ## Package load/unload
@@ -138,13 +157,6 @@ e_voting_cantons <- tibble::tribble(
           "Vaud",          "VD",
         "Zurich",          "ZH"
   )
-```
-
-### Metadata about raw Geneva data
-
-```{r}
-metadata_raw_geneva <- readr::read_csv(file = "metadata_raw_geneva.csv",
-                                       col_types = "Dcllllicc")
 ```
 
 ## Assemble raw data path

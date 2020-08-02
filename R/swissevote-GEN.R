@@ -112,9 +112,6 @@ e_voting_cantons <- tibble::tribble(
         "Zurich",          "ZH"
   )
 
-metadata_raw_geneva <- readr::read_csv(file = "metadata_raw_geneva.csv",
-                                       col_types = "Dcllllicc")
-
 path_raw_data <- function(...,
                           ext = "") {
   

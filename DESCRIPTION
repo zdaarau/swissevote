@@ -16,6 +16,8 @@ Description: swissevote provides functions to parse
 License: AGPL-3
 URL: https://gitlab.com/zdaarau/swissevote
 BugReports: https://gitlab.com/zdaarau/swissevote/issues
+Depends: 
+    R (>= 3.5.0)
 Imports: 
     checkmate (>= 2.0.0),
     dplyr (>= 1.0.0),

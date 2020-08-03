@@ -796,12 +796,6 @@ read_raw_data_geneva <- function(ballot_date,
     rlang::warn(glue::glue("There are raw data files missing for Geneva @ {ballot_date}! Check `swissevote:::metadata_geneva_raw_datasets`."))
   }
   
-  # read in table with codes and names of municipalities and districts
-  municipality_district_codes_and_names <- readr::read_csv(file = path_raw_data("GE/GE_municipality_district_codes_and_names.csv"),
-                                                           col_types = "iiicc",
-                                                           trim_ws = TRUE,
-                                                           skip = 0L)
-  
   # create empty list
   data_raw_list <- list()
   
@@ -844,8 +838,7 @@ read_raw_data_geneva <- function(ballot_date,
                                           check_municipalities = check_municipalities,
                                           remove_unknown_municipality_district_combos = remove_unknown_municipality_district_combos,
                                           remove_NA_locality_codes = remove_NA_locality_codes,
-                                          remove_duplicated_votes = remove_duplicated_votes,
-                                          municipality_district_codes_and_names = municipality_district_codes_and_names)
+                                          remove_duplicated_votes = remove_duplicated_votes)
       
       # skip empty dataframes (no raw data found)
       if (nrow(data_raw)) {
@@ -871,7 +864,7 @@ read_raw_dataset_geneva <- function(filename,
                                     remove_unknown_municipality_district_combos,
                                     remove_NA_locality_codes,
                                     remove_duplicated_votes,
-                                    municipality_district_codes_and_names) {
+                                    metadata_municipalities_districts = metadata_geneva_municipalities_districts) {
   
   # assemble partial file path
   file_path <- path_raw_data("GE", filename)
@@ -1061,7 +1054,7 @@ read_raw_dataset_geneva <- function(filename,
   }
   ## add municipality and district names
   data_raw %<>%
-    dplyr::left_join(y = municipality_district_codes_and_names,
+    dplyr::left_join(y = metadata_municipalities_districts,
                      by = c("municipality_code_2_digits", "district_code")) %>%
     # we can simply ignore `void_since` because all `municipality_code_2_digits`-`district_code` combos are unique anyway
     dplyr::select(-void_since)

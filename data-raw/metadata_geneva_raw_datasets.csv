@@ -147,8 +147,8 @@ ballot_date,ballot_type,is_federal,is_cantonal,is_municipal,is_e_voting_availabl
 2017-02-12,referendum,TRUE,FALSE,FALSE,TRUE,256687,NA,v201710
 2017-05-21,referendum,TRUE,TRUE,FALSE,TRUE,257536,NA,v201720
 2017-05-21,referendum,FALSE,FALSE,TRUE,TRUE,13242,Commune de Onex,v201720_31
-2017-05-21,referendum,FALSE,FALSE,TRUE,TRUE,1645,Commune de Troinex,v201720_41
 2017-09-24,referendum,TRUE,TRUE,FALSE,TRUE,259675,NA,v201730
+2017-05-21,election,FALSE,FALSE,TRUE,TRUE,1645,Commune de Troinex,v201720_41
 2017-09-24,election,FALSE,FALSE,TRUE,FALSE,1450,Commune de Corsier,v201730_19
 2017-09-24,referendum,FALSE,FALSE,TRUE,TRUE,14988,Commune de Carouge,v201730_08
 2018-03-04,referendum,TRUE,FALSE,FALSE,TRUE,261541,NA,v201810

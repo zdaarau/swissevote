@@ -504,6 +504,9 @@ read_raw_data <- function(canton = c("Bern", "Geneva", "Neuchatel"),
     specific_datasets = specific_datasets,
     .use_cache = use_cache,
     .cache_lifespan = cache_lifespan,
+    .id = paste0(pkg, "-read_raw_data-", pkgpins:::expr_to_hash(list(canton = canton,
+                                                                     ballot_date = ballot_date,
+                                                                     specific_datasets = specific_datasets))),
     .pkg = pkg
   )
 }

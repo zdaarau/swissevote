@@ -1,7 +1,7 @@
 Package: swissevote
 Title: Provides Functions Around the Swiss E-Voting Trial Data
     Collected by the Centre for Democracy Studies Aarau (ZDA)
-Version: 0.0.9000
+Version: 0.0.9001
 Authors@R: 
     person(given = "Salim",
            family = "Brüggemann",

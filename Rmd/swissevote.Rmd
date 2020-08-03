@@ -739,6 +739,8 @@ read_raw_data_bern <- function(ballot_date) {
   - `"Z"` = Au local de vote
   - `"Vide"` = Pas voté
 
+- The variable `xnoref` (renamed to `id`) is a personal reference number _uniquely identifying the voter across all the raw data_.
+
 ```{r}
 #' Read in raw data files from the canton of Geneva
 #'

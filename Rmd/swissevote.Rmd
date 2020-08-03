@@ -132,6 +132,7 @@ utils::globalVariables(names = c(".",
                                  "MutationNumber",
                                  "Name_Politische_Ebene",
                                  "n",
+                                 "norefnet",
                                  "nr_of_cantonal_referendums",
                                  "nr_of_federal_referendums",
                                  "nr_of_municipal_referendums",
@@ -152,6 +153,7 @@ utils::globalVariables(names = c(".",
                                  "Titel der Vorlage",
                                  "total_electorate",
                                  "type",
+                                 "typelec",
                                  "typvot",
                                  "V1",
                                  "V2",
@@ -933,6 +935,16 @@ read_raw_dataset_geneva <- function(filename,
   if ("datvot" %in% colnames(data_raw)) {
     
     data_raw %<>% dplyr::rename(date = datvot)
+  }
+  
+  if ("typelec" %in% colnames(data_raw)) {
+    
+    data_raw %<>% dplyr::rename(eligibility_type = typelec)
+  }
+  
+  if ("norefnet" %in% colnames(data_raw)) {
+    
+    data_raw %<>% dplyr::rename(e_vote_id = norefnet)
   }
   
   # remove duplicate votes (where `votcorr == "A"`; only if the necessary variable exists)

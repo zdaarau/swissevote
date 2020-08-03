@@ -41,6 +41,7 @@ utils::globalVariables(names = c(".",
                                  "datvot",
                                  "district",
                                  "district_code",
+                                 "dnais",
                                  "dnaisaa",
                                  "election_level",
                                  "ends_with",
@@ -737,24 +738,52 @@ read_raw_dataset_geneva <- function(filename,
                                   district_code),
                                 as.integer))
   
+  # cols which are only included in a subset of all datasets
+  ## age
   if ("agerevolu" %in% colnames(data_raw)) {
     
-    data_raw %<>% dplyr::rename(age = agerevolu)
+    data_raw %<>%
+      dplyr::mutate(age = as.integer(agerevolu)) %>%
+      dplyr::select(-agerevolu)
   }
   
+  ## ballot date
   if ("datvot" %in% colnames(data_raw)) {
     
-    data_raw %<>% dplyr::rename(date = datvot)
+    data_raw %<>% dplyr::rename(ballot_date = datvot)
   }
   
+  ## eligibility type (Swiss living in Switzerland, Swiss abroad, foreigner)
   if ("typelec" %in% colnames(data_raw)) {
     
     data_raw %<>% dplyr::rename(eligibility_type = typelec)
   }
   
+  ## e-voting card number
   if ("norefnet" %in% colnames(data_raw)) {
     
     data_raw %<>% dplyr::rename(e_vote_id = norefnet)
+  }
+  
+  ## year/date of birth
+  if ("dnaisaa" %in% colnames(data_raw)) {
+    
+    data_raw %<>%
+      dplyr::mutate(year_of_birth = as.integer(dnaisaa)) %>%
+      dplyr::select(-dnaisaa)
+    
+  } else if ("dnais" %in% colnames(data_raw)) {
+    
+    data_raw %<>% dplyr::mutate(year_of_birth = as.integer(lubridate::year(suppressWarnings(lubridate::dmy(dnais)))))
+  }
+  
+  ## date of birth
+  if ("dnais" %in% colnames(data_raw)) {
+    
+    # there are "invalid" year-only dates like `00001955` included which will be parsed to `NA`
+    data_raw %<>%
+      dplyr::mutate(date_of_birth = suppressWarnings(lubridate::dmy(dnais))) %>%
+      dplyr::select(-dnais)
   }
   
   # remove duplicate votes (where `votcorr == "A"`; only if the necessary variable exists)

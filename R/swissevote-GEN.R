@@ -108,7 +108,8 @@ utils::globalVariables(names = c(".",
                                  "votcom",
                                  "votcorr",
                                  "vote_count_e_voting_electorate",
-                                 "vote_count_total"))
+                                 "vote_count_total",
+                                 "xnoref"))
 
 pkg <- utils::packageName()
 
@@ -727,7 +728,8 @@ read_raw_dataset_geneva <- function(filename,
                   is_eligible_federal = qualfed,
                   is_eligible_cantonal = qualcan,
                   is_eligible_municipal = qualcom,
-                  district_code = votarr) %>%
+                  district_code = votarr,
+                  id = xnoref) %>%
     dplyr::mutate(dplyr::across(c(country_canton_code,
                                   municipality_code_2_digits,
                                   district_code),

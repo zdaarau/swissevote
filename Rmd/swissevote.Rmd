@@ -8,7 +8,7 @@ editor_options:
 ## Metadata about raw Geneva data
 
 The Genevan vote register data is split among several files and oddly named. Thus we include the relevant metadata about it directly in this package. Below is
-the code to generate the internal data from the CSV file (which is only included in the source repository but no the package).
+the code to generate the internal data from the CSV file (which is only included in the source repository but not the package).
 
 ```{r, purl = FALSE}
 # mapping between filenames and ballot dates/types/etc.

@@ -2555,7 +2555,7 @@ get_zurich_referendum_dates <- function(exclude_counterproposals = FALSE) {
   referendum_dates <-
     jsonlite::fromJSON(txt = "https://www.web.statistik.zh.ch/cms_abstimmungsarchiv/includes/ajax_get_vorlagen.php") %$%
     aaData %>%
-    magrittr::set_colnames(ncol(.) %>% seq_len() %>% paste0("V", .)) %>%
+    magrittr::set_colnames(paste0("V", seq_len(ncol(.)))) %>%
     tibble::as_tibble() %>%
     dplyr::transmute(id = as.integer(V1),
                      date = lubridate::dmy(V2),

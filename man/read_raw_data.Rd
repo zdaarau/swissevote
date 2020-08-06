@@ -17,7 +17,7 @@ read_raw_data(
 
 \item{ballot_date}{The ballot date of which to read in raw data files.}
 
-\item{specific_datasets}{If not \code{NULL}, only the specified filenames will be processed. A list with vote dates as keys and character vectors of specific
+\item{specific_datasets}{If not \code{NULL}, only the specified filenames will be processed. A list with ballot dates as keys and character vectors of specific
 filenames (without the filetype extension) as values. Setting \code{specific_datasets} is only sensible in case of \code{canton = "Geneva"} and thus ignored
 otherwise.}
 

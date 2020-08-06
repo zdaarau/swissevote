@@ -17,7 +17,7 @@ read_raw_data_geneva(
 \arguments{
 \item{ballot_date}{The ballot date of which to read in raw data files.}
 
-\item{specific_datasets}{If not \code{NULL}, only the specified filenames will be processed. A list with vote dates as keys and character vectors of specific
+\item{specific_datasets}{If not \code{NULL}, only the specified filenames will be processed. A list with ballot dates as keys and character vectors of specific
 filenames (without the filetype extension) as values.}
 
 \item{check_municipalities}{Check if \code{municipality} could be determined for all entries excluding Swiss living abroad. A logical scalar.}

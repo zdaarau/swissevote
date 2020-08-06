@@ -963,9 +963,6 @@ read_raw_data_neuchatel <- function(ballot_date) {
   # determine file type
   file_type <- filetype_data_raw(file_path = file_path)
   
-  # complete file path
-  file_path %<>% paste0(".", file_type)
-  
   # read in data
   if (is.na(file_type)) {
     
@@ -976,46 +973,47 @@ read_raw_data_neuchatel <- function(ballot_date) {
     
   } else if (file_type == "xlsx") {
     
-    data_raw <- readxl::read_excel(path = file_path,
+    data_raw <- readxl::read_excel(path = fs::path(file_path,
+                                                   ext = file_type),
                                    col_names = col_names_types$name,
                                    col_types = col_names_types$type,
                                    skip = 1L)
     
   } else {
     
-    data_raw <- readr::read_csv(file = file_path,
+    data_raw <- readr::read_csv(file = fs::path(file_path,
+                                                ext = file_type),
                                 col_names = col_names_types$name,
                                 col_types = col_types_csv,
                                 trim_ws = TRUE,
                                 skip = 1L)
   }
   
-  # delete obsolete NA columns
-  data_raw <- data_raw[, 1:11]
-  
-  # ensure header line isn't mistakenly included (happens when file contains surplus rows at the beginning)
+  # perform some naive integrity checks
+  ## ensure header line isn't mistakenly included (happens when file contains surplus rows at the beginning)
   if (data_raw %>%
       as.matrix() %>%
       .[!is.na(.)] %>%
       stringr::str_detect(pattern = "(?i)(ele (libell\u00e9|sexe|)|car mode votation)") %>%
       any()) {
     
-    rlang::abort(glue::glue("The NE data file {file_path} seems to contain empty surplus rows at the beginning! Please remove them and try again."))
+    rlang::abort(glue::glue("The NE data file ", fs::path(file_path, ext = file_type),
+                            " seems to contain empty surplus rows at the beginning! Please remove them and try again."))
   }
   
-  # add binary variable `is_foreigner`
+  ## add binary variable `is_foreigner`
   data_raw$is_foreigner <- dplyr::case_when(is.na(data_raw$nationality) ~ NA,
                                             data_raw$nationality == "Suisse" ~ FALSE,
                                             TRUE ~ TRUE)
   
-  # check for missing nationalities
+  ## check for missing nationalities
   if (any(is.na(data_raw$is_foreigner))) {
     
     rlang::warn(glue::glue("Found ", length(which(is.na(data_raw$is_foreigner))), " entries in raw data lacking a nationality (`NA`)! Please double-check ",
                            "raw data from {ballot_date}."))
   }
   
-  # check for invalid data
+  ## check for invalid data
   if (data_raw %>%
       dplyr::filter(is_foreigner & is_swiss_living_abroad) %>%
       nrow() %>%

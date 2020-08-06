@@ -1434,14 +1434,13 @@ get_neuchatel_municipal_ballot_dates <- function(exclude_counterproposals = FALS
                                      municipality,
                                      is_election,
                                      subject)) %>%
-    # special cases @ 2008-06-22:
+    # special cases @ 2008-06-22: municipality mergers weren't effective until 2009-01-01
     # - split "La T\u00e8ne" into "Marin-Epagnier" & "Thielle-Wavre"
     # - split "Val-de-Travers" into "Boveresse", "Buttes", "Couvet", "Fleurier", "Les Bayards", "M\u00f4tiers", "Noiraigue", "Saint-Sulpice" & "Travers"
-    # (municipality fusions weren't effective until 2009-01-01)
     dplyr::mutate(municipality = dplyr::case_when(municipality == "La T\u00e8ne" & date == "2008-06-22" ~ "Marin-Epagnier",
                                                   municipality == "Val-de-Travers" & date == "2008-06-22" ~ "Boveresse",
                                                   TRUE ~ municipality)) %>%
-    tibble::add_row(date = "2008-06-22",
+    tibble::add_row(date = lubridate::as_date("2008-06-22"),
                     municipality = c("Thielle-Wavre",
                                      "Couvet",
                                      "Fleurier",

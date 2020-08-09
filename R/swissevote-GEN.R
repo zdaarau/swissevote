@@ -2460,8 +2460,44 @@ get_zurich_municipal_dates_mettmenstetten <- function() {
 
 get_zurich_municipal_dates_schlieren <- function() {
   
-  get_zurich_municipal_dates_generic(municipality = "Schlieren",
-                                     base_url = "http://www.schlieren.ch/de/politikverwaltung/politik/abstimmungsresultate/archivsuche/welcome.php")
+  base_url <- "https://www.schlieren.ch"
+  
+  data <-
+    xml2::read_html(glue::glue("{base_url}/abstimmungen/vorlagen")) %>%
+    rvest::html_nodes("table") %>%
+    rvest::html_nodes("tbody") %>%
+    # 1st table contains referendums, 2nd table contains elections
+    purrr::map(~ {
+      
+      rvest::html_nodes(x = .x,
+                        css = "tr") %>%
+        purrr::map_dfr(~ {
+          
+          # 1st cell contains date, 2nd cell contains href and subject
+          cells <- rvest::html_nodes(x = .x,
+                                     css = "td")
+          tibble::tibble(ballot_date =
+                           cells[[1]] %>%
+                           rvest::html_attr("data-order") %>%
+                           lubridate::as_date(),
+                         subject =
+                           cells[[2]] %>%
+                           rvest::html_node(css = "a") %>%
+                           rvest::html_text(),
+                         url =
+                           cells[[2]] %>%
+                           rvest::html_node(css = "a") %>%
+                           rvest::html_attr("href") %>%
+                           paste0(base_url, .))
+        })
+    })
+  
+  # merge referendum and election tables
+  dplyr::bind_rows(data[[1]] %>% dplyr::mutate(is_election = FALSE),
+                   data[[2]] %>% dplyr::mutate(is_election = TRUE)) %>%
+    dplyr::mutate(municipality = "Schlieren") %>%
+    dplyr::select(ballot_date, municipality, is_election, subject, url) %>%
+    dplyr::arrange(ballot_date, is_election)
 }
 
 get_zurich_municipal_dates_thalwil <- function() {

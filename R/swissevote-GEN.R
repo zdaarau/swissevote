@@ -76,6 +76,7 @@ utils::globalVariables(names = c(".",
                                  "municipality_code_2_digits",
                                  "MutationDate",
                                  "MutationNumber",
+                                 "name",
                                  "Name_Politische_Ebene",
                                  "n",
                                  "norefnet",
@@ -107,6 +108,7 @@ utils::globalVariables(names = c(".",
                                  "V5",
                                  "V6",
                                  "V7",
+                                 "value",
                                  "void_since",
                                  "votarr",
                                  "votcom",
@@ -2220,15 +2222,17 @@ get_zurich_municipal_ballot_dates <- function(municipalities = NULL,
                                     "Bubikon",
                                     "Fehraltorf",
                                     "Kleinandelfingen",
-                                    "Wiesendangen")
+                                    "Wiesendangen",
+                                    "Winterthur")
   
   partially_implemented_municipalities <- c("B\u00fclach",
                                             "Maur")
   
-  ballot_dates <- tibble::tibble(ballot_date = lubridate::as_date(integer()),
-                                 municipality = character(),
-                                 is_election = logical(),
-                                 subject = character())
+  data <- tibble::tibble(ballot_date = lubridate::as_date(integer()),
+                         municipality = character(),
+                         is_election = logical(),
+                         subject = character(),
+                         url = character())
   
   for (municipality in municipalities) {
     
@@ -2250,29 +2254,29 @@ get_zurich_municipal_ballot_dates <- function(municipalities = NULL,
                                "by hand."))
       }
       
-      current_dates <- switch(EXPR = municipality,
-                              "Boppelsen" = get_zurich_municipal_dates_boppelsen(),
-                              "M\u00e4nnedorf" = get_zurich_municipal_dates_maennedorf(),
-                              "Mettmenstetten" = get_zurich_municipal_dates_mettmenstetten(),
-                              "Schlieren" = get_zurich_municipal_dates_schlieren(),
-                              "Thalwil" = get_zurich_municipal_dates_thalwil(),
-                              "Winterthur" = get_zurich_municipal_dates_winterthur(),
-                              "Z\u00fcrich" = get_zurich_municipal_referendum_dates_zuerich(exclude_counterproposals = exclude_counterproposals))
+      data_current <- switch(EXPR = municipality,
+                             "Boppelsen" = get_zurich_municipal_dates_boppelsen(),
+                             "M\u00e4nnedorf" = get_zurich_municipal_dates_maennedorf(),
+                             "Mettmenstetten" = get_zurich_municipal_dates_mettmenstetten(),
+                             "Schlieren" = get_zurich_municipal_dates_schlieren(),
+                             "Thalwil" = get_zurich_municipal_dates_thalwil(),
+                             "Winterthur" = get_zurich_municipal_dates_winterthur(),
+                             "Z\u00fcrich" = get_zurich_municipal_dates_zuerich(exclude_counterproposals = exclude_counterproposals))
       
-      ballot_dates %<>% dplyr::full_join(y = current_dates,
-                                         by = colnames(current_dates))
+      data %<>% dplyr::full_join(y = data_current,
+                                 by = colnames(data_current))
     }
   }
   
-  ballot_dates %>% dplyr::arrange(ballot_date, municipality, is_election)
+  data %>% dplyr::arrange(ballot_date, municipality, is_election)
 }
 
 election_regex <- "(?i)(^Pfarrer\\s|\\b(Erneuerungs?|Ersatz|Pfarr)?wahl(en|gang|g\u00e4nge)?\\b)"
 
-get_zurich_municipal_dates_generic <- function(municipality,
-                                               base_url,
-                                               start_date = "2000-01-01",
-                                               municipal_types = c("bezirk", "kirchlich", "kommunal", "kreis", "verband")) {
+get_zurich_municipal_dates_generic_iweb_1 <- function(municipality,
+                                                      base_url,
+                                                      start_date = "2000-01-01",
+                                                      municipal_types = c("bezirk", "kirchlich", "kommunal", "kreis", "verband")) {
   start_date %<>% lubridate::as_date()
   
   base_url %<>% paste0("?date_f=",
@@ -2280,10 +2284,10 @@ get_zurich_municipal_dates_generic <- function(municipality,
                        start_date %>% lubridate::month() %>% stringr::str_pad(width = 2L, side = "left", pad = "0"), ".",
                        lubridate::year(start_date))
   
-  ballot_dates <- tibble::tibble(ballot_date = lubridate::as_date(integer()),
-                                 municipality = character(),
-                                 is_election = logical(),
-                                 subject = character())
+  data <- tibble::tibble(ballot_date = lubridate::as_date(integer()),
+                         municipality = character(),
+                         is_election = logical(),
+                         subject = character())
   
   for (municipal_type in municipal_types) {
     
@@ -2297,23 +2301,65 @@ get_zurich_municipal_dates_generic <- function(municipality,
     
     if (all(c("Termin", "Titel der Vorlage") %in% colnames(raw_extract))) {
       
-      ballot_dates <-
+      data <-
         raw_extract %>%
         dplyr::transmute(ballot_date = lubridate::dmy(Termin),
                          municipality = !!municipality,
                          is_election = stringr::str_detect(string = `Titel der Vorlage`,
                                                            pattern = election_regex),
                          subject = `Titel der Vorlage`) %>%
-        dplyr::bind_rows(ballot_dates)
+        dplyr::bind_rows(data)
     }
   }
   
-  if (nrow(ballot_dates) == 0L) {
+  if (nrow(data) == 0L) {
     
-    rlang::abort("No <table> node of the expected structure was returned. You might have to update the `get_zurich_municipal_dates_generic()` function.")
+    rlang::abort(paste0("No <table> node of the expected structure was returned. You might have to update the `get_zurich_municipal_dates_generic_iweb_1()` ",
+                        "function."))
   }
   
-  ballot_dates %>% dplyr::arrange(ballot_date, municipality, is_election)
+  data %>% dplyr::arrange(ballot_date, municipality, is_election)
+}
+
+get_zurich_municipal_dates_generic_iweb_2 <- function(municipality,
+                                                      base_url) {
+  
+  data <-
+    xml2::read_html(glue::glue("{base_url}/abstimmungen/vorlagen")) %>%
+    rvest::html_nodes("table") %>%
+    rvest::html_nodes("tbody") %>%
+    # 1st table contains referendums, 2nd table contains elections
+    purrr::map(~ {
+      
+      rvest::html_nodes(x = .x,
+                        css = "tr") %>%
+        purrr::map_dfr(~ {
+          
+          # 1st cell contains date, 2nd cell contains href and subject
+          cells <- rvest::html_nodes(x = .x,
+                                     css = "td")
+          tibble::tibble(ballot_date =
+                           cells[[1]] %>%
+                           rvest::html_attr("data-order") %>%
+                           lubridate::as_date(),
+                         subject =
+                           cells[[2]] %>%
+                           rvest::html_node(css = "a") %>%
+                           rvest::html_text(),
+                         url =
+                           cells[[2]] %>%
+                           rvest::html_node(css = "a") %>%
+                           rvest::html_attr("href") %>%
+                           paste0(base_url, .))
+        })
+    })
+  
+  # merge referendum and election tables
+  dplyr::bind_rows(data[[1]] %>% dplyr::mutate(is_election = FALSE),
+                   data[[2]] %>% dplyr::mutate(is_election = TRUE)) %>%
+    dplyr::mutate(municipality = !!municipality) %>%
+    dplyr::select(ballot_date, municipality, is_election, subject, url) %>%
+    dplyr::arrange(ballot_date, is_election)
 }
 
 get_zurich_municipal_dates_boppelsen <- function() {
@@ -2372,7 +2418,7 @@ get_zurich_municipal_dates_boppelsen <- function() {
 get_zurich_municipal_dates_buelach <- function() {
   
   raw_extract <-
-    xml2::read_html(x = "https://www.buelach.ch/themen/politik_verwaltung/wahlen_und_abstimmungen/wahlen_und_abstimmungen_resultate/",
+    xml2::read_html(x = "https://www.buelach.ch/themen/politik-verwaltung/wahlen-und-abstimmungen/abstimmungen-und-wahlen-resultate",
                     encoding = "UTF-8") %>%
     rvest::html_nodes(css = ".element") %>%
     rvest::html_nodes(css = ".list") %>%
@@ -2392,118 +2438,89 @@ get_zurich_municipal_dates_buelach <- function() {
                    rvest::html_text(),
                  is_election_date = stringr::str_detect(string = subject_summary,
                                                         pattern = "(?i)wahl"),
-                 link =
+                 url =
                    raw_extract %>%
                    rvest::html_nodes("a") %>%
                    rvest::html_attr(name = "href") %>%
                    paste0("https://www.buelach.ch/", .)) %>%
-    dplyr::transmute(ballot_date, municipality, is_election_date, subject_summary, link) %>%
+    dplyr::transmute(ballot_date, municipality, is_election_date, subject_summary, url) %>%
     dplyr::arrange(ballot_date, municipality, is_election_date)
 }
 
 get_zurich_municipal_dates_maennedorf <- function() {
   
-  get_zurich_municipal_dates_generic(municipality = "M\u00e4nnedorf",
-                                     base_url = "http://www.maennedorf.ch/de/politik/abstimmungsresultate/archivsuche/welcome.php")
+  get_zurich_municipal_dates_generic_iweb_1(municipality = "M\u00e4nnedorf",
+                                            base_url = "http://www.maennedorf.ch/de/politik/abstimmungsresultate/archivsuche/welcome.php")
 }
 
 get_zurich_municipal_dates_maur <- function() {
   
+  response <- httr::GET(url = "https://www.maur.ch/politik-verwaltung/politik/wahlen-abstimmungen.html/52/newsarchive/true",
+                        httr::user_agent(agent = "Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101 Firefox/78.0"))
+  
+  cookies <-
+    response$cookies %>%
+    dplyr::select(name, value) %>%
+    tibble::deframe()
+  
   raw_extract <-
-    httr::POST(url = "http://www.maur.ch/xml_1/internet/de/file/modul/news/archiv.cfm?config=278ED4AB-5056-8276-9CEC654BDC655693&did=1&lid=1&lg=DE&userLG=DE",
-               httr::user_agent(agent = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/60.0"),
-               httr::content_type(type = "application/x-www-form-urlencoded"),
-               # `rubrik = 38` stands for the category "Wahlen / Abstimmungen"
-               body = list(searchtype = "rub",
-                           year = 0L,
-                           month = 0L,
-                           rubrik = 38L),
-               encode = "form") %>%
-    xml2::read_html(encoding = "UTF-8")
+    httr::POST(url = "https://www.maur.ch/politik-verwaltung/politik/wahlen-abstimmungen.html/52/newsarchive/true",
+           httr::user_agent(agent = "Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101 Firefox/78.0"),
+           # TODO: fix this; Cookie values below are just copy-pasted from a browser session
+           httr::set_cookies(cookies),
+           httr::content_type(type = "application/x-www-form-urlencoded"),
+           body = list(newsSearchParams.query = "",
+                       # `newsSearchParams.category = 8` stands for "Wahlen / Abstimmungen"
+                       newsSearchParams.category = 8,
+                       newsSearchParams.dateFrom = "",
+                       newsSearchParams.dateTo = ""),
+           encode = "form") %>%
+    xml2::read_html(encoding = "UTF-8") %>%
+    rvest::html_node(".news-lst-archive") %>%
+    rvest::html_nodes("li")
   
-  ballot_dates <-
-    tibble::tibble(ballot_date =
-                     raw_extract %>%
-                     rvest::html_nodes(css = ".newsarchiv-date") %>%
-                     rvest::html_text() %>%
-                     lubridate::dmy(),
-                   municipality = "Maur",
-                   subject_summary =
-                     raw_extract %>%
-                     rvest::html_nodes(css = ".newsarchiv-title") %>%
-                     rvest::html_text(),
-                   is_election_date = stringr::str_detect(string = subject_summary,
-                                                          pattern = "(?i)wahl"),
-                   link =
-                     raw_extract %>%
-                     rvest::html_nodes(css = ".newsarchiv-title") %>%
-                     rvest::html_nodes(css = "a") %>%
-                     rvest::html_attr(name = "href") %>%
-                     paste0("http://www.maur.ch/xml_1/internet/de/file/modul/news/", .)) %>%
-    dplyr::select(ballot_date, municipality, is_election_date, subject_summary, link) %>%
-    # filter some "false positives"
-    dplyr::filter(!stringr::str_detect(string = subject_summary,
-                                       pattern = "^(?i)(Formular\\s|Loorenprojekt:\\s)")) %>%
-    # and sort
-    dplyr::arrange(ballot_date, municipality, is_election_date)
-  
-  ballot_dates
+  # NOTE: The structure of the returned list is crap! The <time> is just the publication time of the "news entry" and does NOT necessarily match the ballot
+  #       date. It's also impossible to extract the actual ballot date from the `subject_summary` for certain entries (e.g. the "Ersatzwahl des Notars
+  #       beziehungsweise der Notarin für den Rest der Amtsdauer 2018–2022"), so we don't even try...
+  tibble::tibble(ballot_date =
+                   raw_extract %>%
+                   rvest::html_nodes("time") %>%
+                   rvest::html_attr("datetime") %>%
+                   stringr::str_extract("\\d{4}-\\d{2}-\\d{2}") %>%
+                   lubridate::as_date(),
+                 municipality = "Maur",
+                 subject_summary =
+                   raw_extract %>%
+                   rvest::html_nodes("a") %>%
+                   rvest::html_text(),
+                 is_election = stringr::str_detect(string = subject_summary,
+                                                   pattern = "(?i)wahl"),
+                 url =
+                   raw_extract %>%
+                   rvest::html_nodes("a") %>%
+                   rvest::html_attr("href")) %>%
+    dplyr::select(ballot_date, municipality, is_election, subject_summary, url) %>%
+    dplyr::arrange(ballot_date, is_election)
 }
 
 get_zurich_municipal_dates_mettmenstetten <- function() {
   
-  get_zurich_municipal_dates_generic(
+  get_zurich_municipal_dates_generic_iweb_2(
     municipality = "Mettmenstetten",
-    base_url = "http://www.mettmenstetten.ch/de/politikverwaltung/abstimmungenundwahlen/abstimmungsresultate/archivsuche/welcome.php"
+    base_url = "https://www.mettmenstetten.ch"
   )
 }
 
 get_zurich_municipal_dates_schlieren <- function() {
   
-  base_url <- "https://www.schlieren.ch"
-  
-  data <-
-    xml2::read_html(glue::glue("{base_url}/abstimmungen/vorlagen")) %>%
-    rvest::html_nodes("table") %>%
-    rvest::html_nodes("tbody") %>%
-    # 1st table contains referendums, 2nd table contains elections
-    purrr::map(~ {
-      
-      rvest::html_nodes(x = .x,
-                        css = "tr") %>%
-        purrr::map_dfr(~ {
-          
-          # 1st cell contains date, 2nd cell contains href and subject
-          cells <- rvest::html_nodes(x = .x,
-                                     css = "td")
-          tibble::tibble(ballot_date =
-                           cells[[1]] %>%
-                           rvest::html_attr("data-order") %>%
-                           lubridate::as_date(),
-                         subject =
-                           cells[[2]] %>%
-                           rvest::html_node(css = "a") %>%
-                           rvest::html_text(),
-                         url =
-                           cells[[2]] %>%
-                           rvest::html_node(css = "a") %>%
-                           rvest::html_attr("href") %>%
-                           paste0(base_url, .))
-        })
-    })
-  
-  # merge referendum and election tables
-  dplyr::bind_rows(data[[1]] %>% dplyr::mutate(is_election = FALSE),
-                   data[[2]] %>% dplyr::mutate(is_election = TRUE)) %>%
-    dplyr::mutate(municipality = "Schlieren") %>%
-    dplyr::select(ballot_date, municipality, is_election, subject, url) %>%
-    dplyr::arrange(ballot_date, is_election)
+  get_zurich_municipal_dates_generic_iweb_2(municipality = "Schlieren",
+                                            base_url = "https://www.schlieren.ch")
 }
 
 get_zurich_municipal_dates_thalwil <- function() {
   
-  get_zurich_municipal_dates_generic(municipality = "Thalwil",
-                                     base_url = "http://www.thalwil.ch/de/polver/politik/abstimmungsresultate/politrechtevorlagen/welcome.php")
+  get_zurich_municipal_dates_generic_iweb_1(municipality = "Thalwil",
+                                            base_url = "http://www.thalwil.ch/de/polver/politik/abstimmungsresultate/politrechtevorlagen/welcome.php")
 }
 
 get_zurich_municipal_dates_winterthur <- function() {
@@ -2550,7 +2567,7 @@ get_zurich_municipal_dates_winterthur <- function() {
     dplyr::arrange(ballot_date, municipality, is_election)
 }
 
-get_zurich_municipal_referendum_dates_zuerich <- function(exclude_counterproposals = FALSE) {
+get_zurich_municipal_dates_zuerich <- function(exclude_counterproposals = FALSE) {
   
   referendum_dates <-
     readr::read_csv(file = paste0("https://data.stadt-zuerich.ch/dataset/politik_abstimmungen_seit_1933/resource/3b5a8ed9-0765-4d59-95a1-e87aa98350e3/",

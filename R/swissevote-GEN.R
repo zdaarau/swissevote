@@ -2509,7 +2509,7 @@ get_zurich_municipal_dates_thalwil <- function() {
 get_zurich_municipal_dates_winterthur <- function() {
   
   raw_extract <-
-    xml2::read_html(x = "http://wahlen.winterthur.ch/archiv/vote-action/archive/vote-controller/ElectionDay/vote-year/9999/") %>%
+    xml2::read_html("https://wahlen.winterthur.ch/archiv/vote-action/archive/vote-controller/ElectionDay/vote-year/9999/") %>%
     rvest::html_nodes(css = ".electionday-list") %>%
     rvest::html_nodes(css = ".row")
   

@@ -65,7 +65,25 @@ We treat this municipality as if its name had always been written without a hyph
   # set local path to Google Drive folder dependent on username
   options(swissevote.path_raw_data = switch(EXPR = Sys.info()[["user"]],
                                             "salim" = "~/Arbeit/ZDA/Google Drive/edc-projekt/iVoting_dataset/Datenquellen/",
-                                            NULL))
+                                            getOption("swissevote.path_raw_data")))
+  
+  
+  
+  if (is.null(getOption("swissevote.path_raw_data")) || is.na(getOption("swissevote.path_raw_data"))) {
+    
+    rlang::warn("Please set the path to the cantonal raw data files in the option `swissevote.path_raw_data` in order for this package to work properly.")
+    
+  } else {
+    
+    test_valid_path_raw_data <- checkmate::test_directory(getOption("swissevote.path_raw_data"),
+                                                          access = "r")
+    
+    if (!isTRUE(test_valid_path_raw_data)) {
+      
+      rlang::warn(glue::glue("The option `swissevote.path_raw_data` is set to: {getOption('swissevote.path_raw_data')}\n",
+                             "This is not a valid path (with at least read access). Please correct this in order for this package to work properly."))
+    }
+  }
 }
 ```
 

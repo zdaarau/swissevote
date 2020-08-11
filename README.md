@@ -2,6 +2,27 @@
 
 swissevote provides functions to parse cantonal voting register data, to scrape authority websites for ballot data as well as other auxiliary functions around the Swiss e-voting trial data collected by the Centre for Democracy Studies Aarau (ZDA).
 
+## Details
+
+### Raw data files
+
+The **cantonal raw data files** are *not* included in this package due to legal restrictions and/or concerns regarding voter privacy and thus **have to be provided by the user**. The path to the folder holding these files must be set in the [R option](https://rdrr.io/r/base/options.html) **`swissevote.global_cache_lifespan`** and the files under this path are expected to be organized and named in the following way:
+
+``` fs
+[swissevote.path_raw_data]/
+├──BE/
+|  ├──BE_YYYY-MM-DD.EXT
+|  └──...
+├──GE/
+|  ├──vYYYYNN.EXT
+|  └──...
+└──NE/
+   ├──NE_YYYY-MM-DD.EXT
+   └──...
+```
+
+The Genevan raw data files are named according to the column `filename` in `swissevote:::metadata_geneva_raw_datasets` (which has been defined by the Geneva State Chancellery). Raw data files from the other cantons are named by the canton abbreviation and the ballot date.
+
 ## Installation
 
 To install the latest development version of swissevote, run the following in R:

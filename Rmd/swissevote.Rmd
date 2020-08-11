@@ -124,6 +124,7 @@ utils::globalVariables(names = c(".",
                                  "e_voting_electorate",
                                  "federal_elected_power",
                                  "federal_election_procedure",
+                                 "filename",
                                  "group",
                                  "InitialCode",
                                  "is_cantonal",
@@ -631,6 +632,45 @@ convert_canton_names <- function(cantons) {
 ```
 
 # Process vote register data
+
+## List ballot dates for which raw data files are available
+
+```{r}
+#' List ballot dates for which raw data files are available
+#'
+#' @param canton The canton for which to list ballot dates. A character scalar.
+#'
+#' @return A vector of [dates][base::Date].
+#' @export
+ballot_dates_raw_data <- function(canton = c("Bern", "Geneva", "Neuchatel")) {
+  
+  canton_short <- rlang::arg_match(canton) %>% convert_canton_names()
+  
+  result <-
+    getOption("swissevote.path_raw_data") %>%
+    fs::path(canton_short) %>%
+    fs::dir_ls(type = "file",
+               regexp = switch(EXPR = canton_short,
+                               GE = paste0("/", pal::fuse_regex(metadata_geneva_raw_datasets$filename), "\\.(csv|zip|xlsx)$"),
+                               glue::glue("/{canton_short}_\\d{{4}}-\\d{{2}}-\\d{{2}}\\.(csv|zip|xlsx)$"))) %>%
+    stringr::str_extract(pattern = dplyr::if_else(canton_short == "GE",
+                                                  "v\\d{6}(_\\d+)?(?=\\.(csv|zip|xlsx)$)",
+                                                  "\\d{4}-\\d{2}-\\d{2}(?=\\.(csv|zip|xlsx)$)"))
+  
+  if (canton_short == "GE") {
+    
+    result <-
+      metadata_geneva_raw_datasets %>%
+      dplyr::filter(filename %in% result) %$%
+      ballot_date %>%
+      unique()
+  }
+  
+  result %>%
+    lubridate::as_date() %>%
+    sort()
+}
+```
 
 ## Read in raw data files
 

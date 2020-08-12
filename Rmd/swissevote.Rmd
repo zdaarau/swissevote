@@ -1454,7 +1454,7 @@ ballot_dates_federal_neuchatel <- function(exclude_counterproposals = FALSE) {
     dplyr::transmute(ballot_date = lubridate::dmy(ballot_date),
                      is_election = stringr::str_detect(string = subject,
                                                        pattern = "(?i)^(e|\u00e9)lection"),
-                     limited_to_cantons = NA,
+                     limited_to_cantons = NA_character_,
                      subject = subject)
   
   # incorporate latest ballot dates (separate page)

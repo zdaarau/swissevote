@@ -22,9 +22,10 @@ filenames (without the filetype extension) as values.}
 
 \item{check_municipalities}{Check if \code{municipality} could be determined for all entries excluding Swiss living abroad. A logical scalar.}
 
-\item{remove_duplicated_votes}{Remove duplicate votes (where \code{votcorr == "A"}; only if the necessary variable exists). The variable \code{votcorr} is used to
-identify voters for whom several voting cards have been issued (due to non-receipt, loss, etc.). The cases with \code{votcorr = "A"} have to be filtered out in
-order to get correct results. A logical scalar.}
+\item{remove_duplicated_votes}{Remove duplicate votes (where \code{votcorr == "A" | votdup == "1"}; only if the necessary variable exists). A logical scalar. The
+variable \code{votcorr} is used to identify voters for whom several voting cards have been issued (due to non-receipt, loss, etc.). The dummy variable \code{votdup}
+serves the exact same purpose. The cases with \code{votcorr = "A"} (or \code{votdup = "1"}) have to be filtered out in order to get correct results. In the (very
+rare) case both variables are included and contradict each other, \code{votdup} is given preference.}
 
 \item{remove_unknown_municipality_district_combos}{Ignore rows in raw data that are \emph{not} Swiss abroad but missing a \code{municipality} (usually with the
 undocumented district code \code{99}). A logical scalar.}

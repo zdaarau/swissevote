@@ -188,6 +188,7 @@ utils::globalVariables(names = c(".",
                                  "votarr",
                                  "votcom",
                                  "votcorr",
+                                 "votdup",
                                  "vote_count_e_voting_electorate",
                                  "vote_count_total",
                                  "xnoref"))
@@ -812,9 +813,10 @@ read_raw_data_bern <- function(ballot_date) {
 #' @param specific_datasets If not `NULL`, only the specified filenames will be processed. A list with ballot dates as keys and character vectors of specific
 #'   filenames (without the filetype extension) as values.
 #' @param check_municipalities Check if `municipality` could be determined for all entries excluding Swiss living abroad. A logical scalar.
-#' @param remove_duplicated_votes Remove duplicate votes (where `votcorr == "A"`; only if the necessary variable exists). The variable `votcorr` is used to
-#'   identify voters for whom several voting cards have been issued (due to non-receipt, loss, etc.). The cases with `votcorr = "A"` have to be filtered out in
-#'   order to get correct results. A logical scalar.
+#' @param remove_duplicated_votes Remove duplicate votes (where `votcorr == "A" | votdup == "1"`; only if the necessary variable exists). A logical scalar. The
+#'   variable `votcorr` is used to identify voters for whom several voting cards have been issued (due to non-receipt, loss, etc.). The dummy variable `votdup`
+#'   serves the exact same purpose. The cases with `votcorr = "A"` (or `votdup = "1"`) have to be filtered out in order to get correct results. In the (very
+#'   rare) case both variables are included and contradict each other, `votdup` is given preference.
 #' @param remove_unknown_municipality_district_combos Ignore rows in raw data that are _not_ Swiss abroad but missing a `municipality` (usually with the
 #'   undocumented district code `99`). A logical scalar.
 #' @param remove_NA_locality_codes Ignore rows in raw data that have no `municipality_code_2_digits` set (`NA`). A logical scalar.
@@ -1030,10 +1032,18 @@ read_raw_dataset_geneva <- function(filename,
       dplyr::select(-dnais)
   }
   
-  # remove duplicate votes (where `votcorr == "A"`; only if the necessary variable exists)
-  if ("votcorr" %in% colnames(data_raw) & remove_duplicated_votes) {
+  # remove duplicate votes (where `votcorr == "A" | votdup == "1"`; only if the necessary variable exists)
+  if (remove_duplicated_votes && any(c("votcorr", "votdup") %in% colnames(data_raw))) {
     
-    data_raw %<>% dplyr::filter(is.na(votcorr))
+    # prefer `votdup`
+    if ("votdup" %in% colnames(data_raw) && (!checkmate::anyMissing(data_raw[["votdup"]]) || !("votcorr" %in% colnames(data_raw)))) {
+      
+      data_raw %<>% dplyr::filter(votdup != "1")
+      
+    } else {
+      
+      data_raw %<>% dplyr::filter(is.na(votcorr))
+    }
   }
   
   # add binary variable `has_voted`

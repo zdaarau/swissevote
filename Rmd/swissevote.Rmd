@@ -780,7 +780,7 @@ read_raw_data_bern <- function(ballot_date) {
 
     entity | possible variables | chosen variable | notes
     ------ | ------------------ | --------------- | -----
-    `municipality` | `ccom`, `domicom`, `votcom` | **`votcom`** | in the `2016-11-27` data `ccom != votcom` in 27 instances and `domicom != votcom` in one instance
+    `municipality` | `ccom`, `domicom`, `votcom` | **`votcom`** | in the `2016-11-27` data `ccom != votcom` in 27 instances and `domicom != votcom` in one instance; the differences [seem to be larger at earlier ballot dates](https://gitlab.com/c2d-zda/i_voting_dataset/-/issues/16#note_400206372)
     `vote_date` | `date`, `idate` | **`date`** | `idate` is only contained in newer datasets from 2012 onwards;  regarding the `2016-11-27` data, in once instance there's no (semantic) congruence (`date == 19000101` but `idate == 20161130`)
     
 - To determine the `group` there's in theory (i.e. according to the Genevan codebook) the variable `typelec` differentiating between _Suisse résident_ (`SR`),

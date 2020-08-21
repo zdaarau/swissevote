@@ -71,7 +71,7 @@ We treat this municipality as if its name had always been written without a hyph
   
   if (is.null(getOption("swissevote.path_raw_data")) || is.na(getOption("swissevote.path_raw_data"))) {
     
-    rlang::warn("Please set the path to the cantonal raw data files in the option `swissevote.path_raw_data` in order for this package to work properly.")
+    rlang::warn(message = msg_raw_data_path_unset)
     
   } else {
     
@@ -151,10 +151,11 @@ utils::globalVariables(names = c(".",
                                  "municipality_code_2_digits",
                                  "MutationDate",
                                  "MutationNumber",
+                                 "n",
                                  "name",
                                  "Name_Politische_Ebene",
-                                 "n",
                                  "norefnet",
+                                 "notes",
                                  "nr_of_cantonal_referendums",
                                  "nr_of_federal_referendums",
                                  "nr_of_municipal_referendums",
@@ -232,13 +233,33 @@ e_voting_cantons <- tibble::tribble(
   )
 ```
 
+### Messages
+
+```{r}
+msg_raw_data_path_unset <- paste0("Please set the proper path to the cantonal raw data files in the option `swissevote.path_raw_data`.\n",
+                                  "To do so, run: `options(swissevote.path_raw_data = 'PATH/TO/Datenquellen/')`")
+```
+
 ## Assemble raw data path
 
 ```{r}
 path_raw_data <- function(...,
                           ext = "") {
   
-  fs::path(getOption("swissevote.path_raw_data"), ...,
+  path_raw_data <- getOption("swissevote.path_raw_data")
+  
+  if (is.null(path_raw_data)) {
+    rlang::abort(message = msg_raw_data_path_unset)
+  }
+  
+  if (!checkmate::test_directory(path_raw_data,
+                                 access = "r")) {
+    rlang::abort(paste0("The path to the cantonal raw data files is either not valid or not readable.\n",
+                        msg_raw_data_path_unset))
+  }
+  
+  path_raw_data %>%
+  fs::path(...,
            ext = ext) %>%
     fs::path_abs()
 }
@@ -835,28 +856,40 @@ read_raw_data_geneva <- function(ballot_date,
   filenames <-
     metadata_geneva_raw_datasets %>%
     dplyr::filter(ballot_date == !!ballot_date
-                  & is_e_voting_available
-                  & !is.na(filename)) %$%
+                  & is_e_voting_available) %$%
     filename
+  
+  # abort if all files are missing
+  if (length(filenames) == 0L) {
+    
+    rlang::abort(glue::glue("There is no raw data file available for Geneva @ {ballot_date}. See `swissevote:::metadata_geneva_raw_datasets`."))
+  }
+  
+  # warn if some files are unknown
+  if (any(is.na(filenames))) {
+    
+    na_notes <-
+      metadata_geneva_raw_datasets %>%
+      dplyr::filter(ballot_date == !!ballot_date
+                    & is_e_voting_available) %$%
+      notes %>%
+      dplyr::first() %>%
+      magrittr::extract(!is.na(.))
+    
+    rlang::abort(glue::glue("The raw data filename for Geneva @ {ballot_date} ",
+                            dplyr::if_else(length(na_notes) > 0L,
+                                           "({na_notes}) ",
+                                           ""),
+                            "is unknown. Check `swissevote:::metadata_geneva_raw_datasets`."))
+  }
+  
+  filenames %<>% magrittr::extract(!is.na(.))
   
   # take `specific_datasets` into account
   if (!is.null(specific_datasets[[ballot_date]])
       & length(filenames)) {
     
-    filenames %<>% .[filenames %in% specific_datasets[[ballot_date]]]
-  }
-  
-  # print a warning if some files are missing (filename = ?)
-  if (metadata_geneva_raw_datasets %>%
-      dplyr::filter(ballot_date == !!ballot_date
-                    & is_e_voting_available) %$%
-      filename %>%
-      is.na() %>%
-      which() %>%
-      length() %>%
-      magrittr::is_greater_than(0L)) {
-    
-    rlang::warn(glue::glue("There are raw data files missing for Geneva @ {ballot_date}! Check `swissevote:::metadata_geneva_raw_datasets`."))
+    filenames %<>% magrittr::extract(. %in% specific_datasets[[ballot_date]])
   }
   
   # create empty list
@@ -890,13 +923,8 @@ read_raw_data_geneva <- function(ballot_date,
     
     for (filename in filenames) {
       
-      metadata_geneva_raw_datasets_subset <-
-        metadata_geneva_raw_datasets %>%
-        dplyr::filter(ballot_date == !!ballot_date
-                      & filename == !!filename) %T>%
-        {checkmate::assert_true(x = nrow(.) == 1L,
-                                .var.name = "nrow(metadata_geneva_raw_datasets_subset) == 1L")}
-      
+      metadata_geneva_raw_datasets_subset <- metadata_geneva_raw_datasets %>% dplyr::filter(ballot_date == !!ballot_date
+                                                                                            & filename == !!filename)
       data_raw <- read_raw_dataset_geneva(filename = filename,
                                           check_municipalities = check_municipalities,
                                           remove_unknown_municipality_district_combos = remove_unknown_municipality_district_combos,

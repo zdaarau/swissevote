@@ -10,7 +10,9 @@ output: pal::gitlab_document
 
 ### Raw data files
 
-The **cantonal raw data files** are *not* included in this package due to legal restrictions and/or concerns regarding voter privacy and thus **have to be provided by the user**. The path to the folder holding these files must be set in the [R option](https://rdrr.io/r/base/options.html) **`swissevote.path_raw_data`** and the files under this path are expected to be organized and named in the following way:
+The **cantonal raw data files** are *not* included in this package due to legal restrictions and/or concerns regarding voter privacy and thus **have to be
+provided by the user**. The path to the folder holding these files must be set in the [R option](https://rdrr.io/r/base/options.html)
+**`swissevote.path_raw_data`** and the files under this path are expected to be organized and named in the following way:
 
 ``` {.fs}
 [swissevote.path_raw_data]/
@@ -25,13 +27,17 @@ The **cantonal raw data files** are *not* included in this package due to legal 
    └──...
 ```
 
-The Genevan raw data files must be named according to the column `filename` in `swissevote:::metadata_geneva_raw_datasets` (which has been defined by the Geneva State Chancellery). Raw data files from the other cantons must be named by the canton abbreviation and the ballot date (e.g. `NE_2019-02-10`).
+The Genevan raw data files must be named according to the column `filename` in `swissevote:::metadata_geneva_raw_datasets` (which has been defined by the
+Geneva State Chancellery). Raw data files from the other cantons must be named by the canton abbreviation and the ballot date (e.g. `NE_2019-02-10`).
 
 ### Caching
 
-Time-consuming operations like reading in the raw datasets or scraping ballot dates from cantonal websites are cached to the local filesystem by default (using [pkgpins](https://gitlab.com/salim_b/r/pkgs/pkgpins)). The maximum cache lifespan for all affected functions can be set in the global option **`swissevote.global_cache_lifespan`**[^1] (defaults to *30 days* if unset).
+Time-consuming operations like reading in the raw datasets or scraping ballot dates from cantonal websites are cached to the local filesystem by default (using
+[pkgpins](https://gitlab.com/salim_b/r/pkgs/pkgpins)). The maximum cache lifespan for all affected functions can be set in the global option
+**`swissevote.global_cache_lifespan`**[^1] (defaults to *30 days* if unset).
 
-[^1]: Its value must be a valid [lubridate duration](https://lubridate.tidyverse.org/reference/as.duration.html#details) which can be a natural-language string like `"2 days 1 minute 30 seconds"` (or short `2d1min30s`).
+[^1]: Its value must be a valid [lubridate duration](https://lubridate.tidyverse.org/reference/as.duration.html#details) which can be a natural-language string
+    like `"2 days 1 minute 30 seconds"` (or short `2d1min30s`).
 
 ## Installation
 
@@ -50,4 +56,4 @@ Time-consuming operations like reading in the raw datasets or scraping ballot da
 ```{r, coding-style-snippet, child = pkgsnip::snip_path("coding-style-notice.Rmd")}
 ```
 
-------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------

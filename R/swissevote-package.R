@@ -1,3 +1,11 @@
+#' @section Package options:
+#'
+#' The following package-specific R options are used to control the package's functionality:
+#'
+#' ```{r, echo = FALSE}
+#' print_opts()
+#' ```
+#'
 #' @keywords internal
 #' @importFrom magrittr %>%
 #' @importFrom magrittr %<>%

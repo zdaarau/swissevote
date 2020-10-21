@@ -71,6 +71,7 @@ utils::globalVariables(names = c(".",
                                  "filename",
                                  "group",
                                  "InitialCode",
+                                 "is_auto_init",
                                  "is_cantonal",
                                  "is_cross_vote_aggregated",
                                  "is_election",
@@ -161,6 +162,33 @@ e_voting_cantons <- tibble::tribble(
           "Vaud",          "VD",
         "Zurich",          "ZH"
   )
+
+opts <- function(pretty_colnames = FALSE) {
+  
+  tibble::tribble(
+    ~name,                                 ~description,           ~is_auto_init,
+    "swissevote.path_raw_data", "the path to the directory holding the cantonal raw data files (which are not part of this package due to legal restrictions and/or concerns regarding voter privacy); see the package's [README](https://gitlab.com/zdaarau/swissevote#raw-data-files) for more details; only set automatically for user=salim", TRUE,
+  ) %>%
+    purrr::when(checkmate::assert_flag(pretty_colnames) ~ dplyr::rename(.data = .,
+                                                                        "set automatically during package load" = is_auto_init),
+                ~ .)
+}
+
+print_opts <- function() {
+  
+  opts() %>%
+    dplyr::mutate(name = paste0("`", name, "`"),
+                  "set automatically during package load" = lgl_to_unicode(is_auto_init)) %>%
+    dplyr::select(-is_auto_init) %>%
+    pal::pipe_table()
+}
+
+lgl_to_unicode <- function(x) {
+  
+  dplyr::if_else(checkmate::assert_logical(x),
+                 "\u2705",
+                 "\u274C")
+}
 
 msg_raw_data_path_unset <- paste0("Please set the proper path to the cantonal raw data files in the option `swissevote.path_raw_data`.\n",
                                   "To do so, run: `options(swissevote.path_raw_data = 'PATH/TO/Datenquellen/')`")

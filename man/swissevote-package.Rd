@@ -13,6 +13,15 @@ swissevote provides functions to parse
     trial data collected by the Centre for Democracy Studies Aarau
     (ZDA).
 }
+\section{Package options}{
+
+
+The following package-specific R options are used to control the package's functionality:\tabular{lll}{
+   \strong{name} \tab \strong{description} \tab \strong{set automatically during package load} \cr
+   \code{swissevote.path_raw_data} \tab the path to the directory holding the cantonal raw data files (which are not part of this package due to legal restrictions and/or concerns regarding voter privacy); see the package's \href{https://gitlab.com/zdaarau/swissevote#raw-data-files}{README} for more details; only set automatically for user=salim \tab ✅ \cr
+}
+}
+
 \seealso{
 Useful links:
 \itemize{

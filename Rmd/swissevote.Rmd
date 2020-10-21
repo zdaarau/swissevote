@@ -5,7 +5,28 @@ editor_options:
 
 # NOTES
 
-## Metadata about raw Geneva data
+## Spelling of municipalities
+
+There is one municipality present in the raw data, *La Grande Béroche*, which has officially changed its spelling. It was created by the merger of four
+municipalities on 2018-01-01 and it was initially foreseen that it would be written *La Grande-Béroche*. But the hyphen [was dropped effective
+2018-04-01](https://archive.is/x9ixU). A translation of the relevant info:
+
+> The Federal Office of Topography swisstopo, the official body that decides on the spelling of the names of Swiss municipalities, had announced, when the new
+> municipality of *La Grande Béroche* was created, that its name would include a hyphen. However, the merger agreement did not include a hyphen in the name of
+> La Grande Béroche. The authorities of La Grande Béroche, with the support of the municipal authorities, initiated an approval procedure with the competent
+> federal authorities and obtained their approval. On 9 March, swisstopo confirmed that the spelling of the name of the municipality of La Grande Béroche would
+> be officially corrected with effect from 1 April 2018 and would be written without a hyphen.
+
+We treat this municipality as if its name had always been written without a hyphen: *La Grande Béroche*
+
+# INTERNAL
+
+## Package-internal data
+
+The R code chunk below is *not* included in the [source package](https://r-pkgs.org/package-structure-state.html#source-package). The chunk has to be executed
+at least once to generate the necessary internal data file [`R/sysdata.rda`](https://r-pkgs.org/data.html#data-sysdata).
+
+### Metadata about raw Geneva data
 
 The Genevan vote register data is often split among several files per ballot date and oddly named. Thus we include the relevant metadata about it directly in
 this package. Below is the code to generate the internal data from the CSV file (which is only included in the source repository but not the package).
@@ -31,22 +52,6 @@ usethis::use_data(metadata_geneva_raw_datasets,
                   compress = "xz",
                   version = 3L)
 ```
-
-### Spelling of municipalities
-
-There is one municipality present in the raw data, *La Grande Béroche*, which has officially changed its spelling. It was created by the merger of four
-municipalities on 2018-01-01 and it was initially foreseen that it would be written *La Grande-Béroche*. But the hypen [was dropped effective
-2018-04-01](https://archive.is/x9ixU). A translation of the relevant info:
-
-> The Federal Office of Topography swisstopo, the official body that decides on the spelling of the names of Swiss municipalities, had announced, when the new
-> municipality of *La Grande Béroche* was created, that its name would include a hyphen. However, the merger agreement did not include a hyphen in the name of
-> La Grande Béroche. The authorities of La Grande Béroche, with the support of the municipal authorities, initiated an approval procedure with the competent
-> federal authorities and obtained their approval. On 9 March, swisstopo confirmed that the spelling of the name of the municipality of La Grande Béroche would
-> be officially corrected with effect from 1 April 2018 and would be written without a hyphen.
-
-We treat this municipality as if its name had always been written without a hyphen: *La Grande Béroche*
-
-# INTERNAL
 
 ## Package load/unload
 

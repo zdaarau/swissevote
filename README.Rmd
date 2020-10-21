@@ -27,8 +27,8 @@ provided by the user**. The path to the folder holding these files must be set i
    └──...
 ```
 
-The Genevan raw data files must be named according to the column `filename` in `swissevote:::metadata_geneva_raw_datasets` (which has been defined by the
-Geneva State Chancellery). Raw data files from the other cantons must be named by the canton abbreviation and the ballot date (e.g. `NE_2019-02-10`).
+The Genevan raw data files must be named according to the column `filename` in `swissevote:::metadata_geneva_raw_datasets` (which has been defined by the Geneva
+State Chancellery). Raw data files from the other cantons must be named by the canton abbreviation and the ballot date (e.g. `NE_2019-02-10`).
 
 ### Caching
 
@@ -56,4 +56,4 @@ Time-consuming operations like reading in the raw datasets or scraping ballot da
 ```{r, coding-style-snippet, child = pkgsnip::snip_path("coding-style-notice.Rmd")}
 ```
 
----------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------

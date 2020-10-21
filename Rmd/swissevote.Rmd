@@ -303,7 +303,7 @@ path_raw_data <- function(...,
 }
 ```
 
-## Determine filetype of raw data file
+### Determine filetype of raw data file
 
 ```{r}
 filetype_data_raw <- function(file_path,
@@ -323,7 +323,7 @@ filetype_data_raw <- function(file_path,
 }
 ```
 
-## Get municipalities that occured in the data so far
+### Get municipalities that occured in the data so far
 
 TODO: Replace hardcoded municipalities by a generic solution.
 
@@ -380,11 +380,11 @@ municipalities <- function(canton = c("Geneva", "Neuchatel", "Zurich")) {
 }
 ```
 
-## Convert codes
+### Convert codes
 
 TODO: Get rid of the `*_code_*` vars altogether and transform the fns below to convert strings/factors
 
-### Determine combination of three-code variables (`combined_election_procedure`)
+#### Determine combination of three-code variables (`combined_election_procedure`)
 
 ```{r}
 #' Determine combination of three-code variables (`combined_election_procedure`)
@@ -424,7 +424,7 @@ determine_3_code_combo <- function(...) {
 }
 ```
 
-### Determine combination of seven-code variables (like `combined_level`)
+#### Determine combination of seven-code variables (like `combined_level`)
 
 ```{r}
 #' Determine combination of seven-code variables (like `combined_level`)
@@ -481,7 +481,7 @@ determine_7_code_combo <- function(...) {
 }
 ```
 
-### Determine `combined_elected_power`
+#### Determine `combined_elected_power`
 
 ```{r}
 combine_elected_powers <- function(federal_elected_power = NA,
@@ -502,7 +502,7 @@ combine_elected_powers <- function(federal_elected_power = NA,
 }
 ```
 
-### Combine group code
+#### Combine group code
 
 ```{r}
 combine_group <- function(...) {
@@ -551,7 +551,7 @@ combine_group <- function(...) {
 }
 ```
 
-### Convert `group` code to `group_name`
+#### Convert `group` code to `group_name`
 
 ```{r}
 get_group_name <- function(group) {
@@ -567,7 +567,7 @@ get_group_name <- function(group) {
 }
 ```
 
-### Convert `type` code to `type_name`
+#### Convert `type` code to `type_name`
 
 ```{r}
 get_type_name <- function(type) {
@@ -580,7 +580,7 @@ get_type_name <- function(type) {
 }
 ```
 
-### Convert `*_level` code to name(s)
+#### Convert `*_level` code to name(s)
 
 ```{r}
 get_level_name <- function(level) {
@@ -598,7 +598,7 @@ get_level_name <- function(level) {
 }
 ```
 
-### Convert `federal_elected_power` code to `federal_elected_power_name`
+#### Convert `federal_elected_power` code to `federal_elected_power_name`
 
 ```{r}
 get_federal_elected_power_name <- function(federal_elected_power) {
@@ -612,7 +612,7 @@ get_federal_elected_power_name <- function(federal_elected_power) {
 }
 ```
 
-### Convert `*_elected_power` code to name(s)
+#### Convert `*_elected_power` code to name(s)
 
 This does *not* apply to `federal_elected_power`!
 
@@ -634,7 +634,7 @@ get_elected_power_name <- function(elected_power) {
 }
 ```
 
-### Convert `*_election_procedure` codes to names
+#### Convert `*_election_procedure` codes to names
 
 ```{r}
 get_election_procedure_name <- function(election_procedure) {
@@ -834,17 +834,17 @@ read_raw_data_bern <- function(ballot_date) {
     for specifics. The `read_raw_data_geneva()` function below reads in *all* of them as long as they're available. The `create_geneva_data()` function is
     designed to do a subsequent cross-vote aggregation.
 
--   There seems to be more than one variable for multiple relevant entities in the Genevese voting register data. Therefore we had to decide which ones of
-    these we use for our data processing:
+-   There seems to be more than one variable for multiple relevant entities in the Genevese voting register data. Therefore we had to decide which ones of these
+    we use for our data processing:
 
     | entity         | possible variables          | chosen variable | notes                                                                                                                                                                                                                                  |
     |----------------|-----------------------------|-----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
     | `municipality` | `ccom`, `domicom`, `votcom` | **`votcom`**    | in the `2016-11-27` data `ccom != votcom` in 27 instances and `domicom != votcom` in one instance; the differences [seem to be larger at earlier ballot dates](https://gitlab.com/c2d-zda/i_voting_dataset/-/issues/16#note_400206372) |
     | `vote_date`    | `date`, `idate`             | **`date`**      | `idate` is only contained in newer datasets from 2012 onwards; regarding the `2016-11-27` data, in once instance there's no (semantic) congruence (`date == 19000101` but `idate == 20161130`)                                         |
 
--   To determine the `group` there's in theory (i.e. according to the Genevan codebook) the variable `typelec` differentiating between *Suisse résident*
-    (`SR`), *Suisse de l'étranger* (`SE`) and *Etranger résident* (`ER`). But de facto this variable is either always `NA` (up until 2009 and some later dates,
-    e.g. `2011-05-15` and `2011-11-27`), only shows two values (`NA` and `SR`) or isn't included at all (from 2012 onwards).
+-   To determine the `group` there's in theory (i.e. according to the Genevan codebook) the variable `typelec` differentiating between *Suisse résident* (`SR`),
+    *Suisse de l'étranger* (`SE`) and *Etranger résident* (`ER`). But de facto this variable is either always `NA` (up until 2009 and some later dates, e.g.
+    `2011-05-15` and `2011-11-27`), only shows two values (`NA` and `SR`) or isn't included at all (from 2012 onwards).
 
 -   The variable `votcorr` is used to identify voters for whom several voting cards have been issued (due to non-receipt, loss, etc.). The cases with
     `votcorr = "A"` have to be filtered out in order to get correct results.
@@ -2219,8 +2219,7 @@ scrape_geneva_referendum_dates_after_2014 <- function(year) {
 
 ###### Scrape a referendum date between 2014 and 2018-06-10
 
-This function scrapes the ballot-date-specific subpages of the old format. The ballot-date-specific subpages from `2018-09-23` onwards are hosted on a new
-site.
+This function scrapes the ballot-date-specific subpages of the old format. The ballot-date-specific subpages from `2018-09-23` onwards are hosted on a new site.
 
 ```{r}
 scrape_geneva_referendum_date_between_2014_mid_2018 <- function(ballot_date,
@@ -2370,10 +2369,10 @@ scrape_geneva_referendum_date_after_mid_2018 <- function(ballot_date,
 
 -   The regex-based string detection we have to rely on to identify the political `level` is pretty fuzzy. It might need an update from time to time.
 
--   The relevant website <https://www.ge.ch/elections/> is not of a well-structured enough form to retrieve all the data of interest programmatically.
-    Therefore the function below returns a `subject_summary` of the ballot date (providing the information what institutions were elected in varying levels of
-    detail) instead of the individual `subject`s (i.e. elected institutions, one per row), and a `link` pointing to the relevant subpage where more info about
-    the election date can be found.
+-   The relevant website <https://www.ge.ch/elections/> is not of a well-structured enough form to retrieve all the data of interest programmatically. Therefore
+    the function below returns a `subject_summary` of the ballot date (providing the information what institutions were elected in varying levels of detail)
+    instead of the individual `subject`s (i.e. elected institutions, one per row), and a `link` pointing to the relevant subpage where more info about the
+    election date can be found.
 
 ```{r}
 get_geneva_election_dates <- function() {
@@ -2637,16 +2636,15 @@ There are two major issues concerning the ballot dates from the Canton of Zurich
 
 2.  Municipal referendums aren't collected centrally anywhere (the canton just [points to the municipal/city
     administrations](https://wahlen-abstimmungen.zh.ch/internet/justiz_inneres/wahlen-abstimmungen/de/fragen-antworten.html)), so they can't be scraped from a
-    single site. Instead we have to scrape all the individual sites of the different municipalities (13 currently) to get this data. In some cases (4
-    currently) there's no kind of vote archive available at all we could scrape and in other cases (2 currently) the website is not of a well-structured enough
-    form to retrieve all the data of interest programmatically (we just try to return as much as possible).
+    single site. Instead we have to scrape all the individual sites of the different municipalities (13 currently) to get this data. In some cases (4 currently)
+    there's no kind of vote archive available at all we could scrape and in other cases (2 currently) the website is not of a well-structured enough form to
+    retrieve all the data of interest programmatically (we just try to return as much as possible).
 
 ##### Get federal and cantonal referendum dates from Zurich's official website
 
 **Remarks:**
 
--   This function scrapes the referendum dates and subjects from <https://www.web.statistik.zh.ch/cms_abstimmungsarchiv/index.php> and returns them as a
-    tibble.
+-   This function scrapes the referendum dates and subjects from <https://www.web.statistik.zh.ch/cms_abstimmungsarchiv/index.php> and returns them as a tibble.
 
 -   Set the parameter `exclude_counterproposals` to `TRUE` in order to exclude indirect counterproposals and tie-breaker questions.
 
@@ -2838,7 +2836,7 @@ We define the regular expression to detect elections here so it can be easily re
 election_regex <- "(?i)(^Pfarrer\\s|\\b(Erneuerungs?|Ersatz|Pfarr)?wahl(en|gang|g\u00e4nge)?\\b)"
 ```
 
----------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 **Generic functions:**
 
@@ -3017,9 +3015,9 @@ get_zurich_municipal_dates_boppelsen <- function() {
 **Remarks**:
 
 -   The relevant website <https://www.buelach.ch/themen/politik_verwaltung/wahlen_und_abstimmungen/wahlen_und_abstimmungen_resultate/> doesn't provide the
-    information we need in a well-structured form. Therefore the function below returns a `subject_summary` of the ballot date (mostly providing the
-    information if it was a referendum, election or both) instead of the individual `subject`s, and a `url` pointing to the relevant subpage where more info
-    about the ballot date is found.
+    information we need in a well-structured form. Therefore the function below returns a `subject_summary` of the ballot date (mostly providing the information
+    if it was a referendum, election or both) instead of the individual `subject`s, and a `url` pointing to the relevant subpage where more info about the
+    ballot date is found.
 
 ```{r}
 get_zurich_municipal_dates_buelach <- function() {

@@ -13,7 +13,7 @@ Description: swissevote provides functions to parse
     data as well as other auxiliary functions around the Swiss e-voting
     trial data collected by the Centre for Democracy Studies Aarau
     (ZDA).
-License: AGPL-3
+License: AGPL (>= 3)
 URL: https://gitlab.com/zdaarau/swissevote
 BugReports: https://gitlab.com/zdaarau/swissevote/issues
 Depends: 

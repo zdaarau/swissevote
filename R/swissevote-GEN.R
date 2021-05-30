@@ -2413,8 +2413,7 @@ get_zurich_municipal_dates_generic_iweb_1 <- function(municipality,
                       encoding = "windows-1252") %>%
       rvest::html_nodes(css = "table") %>%
       dplyr::last() %>%
-      rvest::html_table() %>%
-      tibble::as_tibble()
+      rvest::html_table()
     
     if (all(c("Termin", "Titel der Vorlage") %in% colnames(raw_extract))) {
       

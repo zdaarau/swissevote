@@ -55,5 +55,3 @@ Time-consuming operations like reading in the raw datasets or scraping ballot da
 
 ```{r, coding-style-snippet, child = pkgsnip::snip_path("coding-style-notice.Rmd")}
 ```
-
-----------------------------------------------------------------------------------------------------------------------------------------------------------------

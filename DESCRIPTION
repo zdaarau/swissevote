@@ -1,6 +1,6 @@
 Package: swissevote
-Title: Provides Functions Around the Swiss E-Voting Trial Data
-    Collected by the Centre for Democracy Studies Aarau (ZDA)
+Title: Provides Functions Around the Swiss E-Voting Trial Data Collected
+    by the Centre for Democracy Studies Aarau (ZDA)
 Version: 0.0.9010
 Authors@R: 
     person(given = "Salim",
@@ -8,11 +8,11 @@ Authors@R:
            role = c("aut", "cre"),
            email = "salim-b@pm.me",
            comment = c(ORCID = "0000-0002-5329-5987"))
-Description: swissevote provides functions to parse
-    cantonal voting register data, to scrape authority websites for ballot
-    data as well as other auxiliary functions around the Swiss e-voting
-    trial data collected by the Centre for Democracy Studies Aarau
-    (ZDA).
+Description: swissevote can parse cantonal voting register data, scrape
+    authority websites for ballot data and provides other auxiliary
+    functions around the Swiss e-voting trial data collected by the Centre
+    for Democracy Studies Aarau (ZDA) at the University of Zurich,
+    Switzerland.
 License: AGPL (>= 3)
 URL: https://gitlab.com/zdaarau/swissevote
 BugReports: https://gitlab.com/zdaarau/swissevote/issues

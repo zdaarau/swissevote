@@ -37,7 +37,7 @@ if (!("remotes" %in% rownames(installed.packages()))) {
                    repos = "https://cloud.r-project.org/")
 }
 
-remotes::install_gitlab(repo = "zdaarau/swissevote")
+remotes::install_gitlab(repo = "zdaarau/rpkgs/swissevote")
 ```
 
 ## Development

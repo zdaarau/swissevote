@@ -177,8 +177,11 @@ e_voting_cantons <- tibble::tribble(
 opts <- function(pretty_colnames = FALSE) {
   
   tibble::tribble(
-    ~name,                                 ~description,           ~is_auto_init,
-    "swissevote.path_raw_data", "the path to the directory holding the cantonal raw data files (which are not part of this package due to legal restrictions and/or concerns regarding voter privacy); see the package's [README](https://gitlab.com/zdaarau/swissevote#raw-data-files) for more details; only set automatically for user=salim", TRUE,
+    ~name, ~description, ~is_auto_init,
+    "swissevote.path_raw_data", paste0("the path to the directory holding the cantonal raw data files (which are not part of this package due to legal ",
+                                       "restrictions and/or concerns regarding voter privacy); see the package's ",
+                                       "[README](https://gitlab.com/zdaarau/rpkgs/swissevote#raw-data-files) for more details; only set automatically for ",
+                                       "user=salim"), TRUE,
     "swissevote.global_cache_lifespan", "the default cache lifespan for all functions taking a `cache_lifespan` argument; defaults to 30 days", TRUE,
   ) %>%
     purrr::when(checkmate::assert_flag(pretty_colnames) ~ dplyr::rename(.data = .,

@@ -1394,9 +1394,9 @@ ballot_dates_latest_neuchatel <- function() {
   raw_extract <-
     xml2::read_html(x = "https://www2.ne.ch/vote",
                     encoding = "windows-1252") %>%
-    rvest::html_nodes(css = "table") %>%
+    rvest::html_elements(css = "table") %>%
     magrittr::extract2(4L) %>%
-    rvest::html_nodes(css = "td")
+    rvest::html_elements(css = "td")
   
   level_i <- NA
   
@@ -1411,7 +1411,7 @@ ballot_dates_latest_neuchatel <- function() {
                         "Scrutins communaux" = "municipal")
       
     } else if (isTRUE(raw_extract[[i]] %>%
-                      rvest::html_nodes(css = "a") %>%
+                      rvest::html_elements(css = "a") %>%
                       rvest::html_attr(name = "class") %>%
                       magrittr::equals("SubSectionTitle"))
                & !is.na(level_i)) {
@@ -1515,9 +1515,9 @@ ballot_dates_federal_neuchatel <- function(exclude_counterproposals = FALSE) {
   ballot_dates <-
     xml2::read_html(x = "https://www2.ne.ch/vote/AnciensScrutinsFederaux.asp",
                     encoding = "windows-1252") %>%
-    rvest::html_node(css = "body") %>%
-    rvest::html_node(css = "table") %>%
-    rvest::html_nodes(css = ".SubSectionTitle") %>%
+    rvest::html_element(css = "body") %>%
+    rvest::html_element(css = "table") %>%
+    rvest::html_elements(css = ".SubSectionTitle") %>%
     rvest::html_text() %>%
     stringr::str_squish() %>%
     stringr::str_replace(pattern = "^(.+?)( - \\d+?\\.\\d+?\\.\\d+)( )(\\(.+?\\))$",
@@ -1741,9 +1741,9 @@ get_neuchatel_cantonal_ballot_dates <- function(council_of_states = FALSE,
   ballot_dates <-
     xml2::read_html(x = "https://www2.ne.ch/vote/AnciensScrutinsCantonaux.asp",
                     encoding = "windows-1252") %>%
-    rvest::html_node(css = "body") %>%
-    rvest::html_node(css = "table") %>%
-    rvest::html_nodes(css = ".SubSectionTitle") %>%
+    rvest::html_element(css = "body") %>%
+    rvest::html_element(css = "table") %>%
+    rvest::html_elements(css = ".SubSectionTitle") %>%
     rvest::html_text() %>%
     stringr::str_squish() %>%
     stringr::str_replace(pattern = "^(.+?)( - \\d+?\\.\\d+?\\.\\d+)( )(\\(.+?\\))$",
@@ -1802,9 +1802,9 @@ get_neuchatel_municipal_ballot_dates <- function(exclude_counterproposals = FALS
     # get archived ballot dates
     xml2::read_html(x = "https://www2.ne.ch/vote/AnciensScrutinsCommunaux.asp",
                     encoding = "windows-1252") %>%
-    rvest::html_node(css = "body") %>%
-    rvest::html_node(css = "table") %>%
-    rvest::html_nodes(css = ".SubSectionTitle") %>%
+    rvest::html_element(css = "body") %>%
+    rvest::html_element(css = "table") %>%
+    rvest::html_elements(css = ".SubSectionTitle") %>%
     rvest::html_text() %>%
     stringr::str_squish() %>%
     stringr::str_replace(pattern = "^(.+?)( - \\d+?\\.\\d+?\\.\\d+)( )(\\(.+?\\))$",
@@ -2007,8 +2007,8 @@ scrape_geneva_referendum_dates_before_2007 <- function(year) {
   raw_extract <-
     xml2::read_html(x = paste0("https://www.ge.ch/votations/", year, ".asp"),
                     encoding = "windows-1252") %>%
-    rvest::html_nodes(css = "#texte_bordure") %>%
-    rvest::html_nodes(css = "ul")
+    rvest::html_elements(css = "#texte_bordure") %>%
+    rvest::html_elements(css = "ul")
   
   level <-
     raw_extract %>%
@@ -2022,19 +2022,19 @@ scrape_geneva_referendum_dates_before_2007 <- function(year) {
     
     raw_subextract <-
       raw_extract[[i]] %>%
-      rvest::html_nodes(css = "li")
+      rvest::html_elements(css = "li")
     
     # exclude cancelled proposals (formatted struck through)
     is_cancelled <-
       raw_subextract %>%
-      rvest::html_node(css = "span") %>%
+      rvest::html_element(css = "span") %>%
       rvest::html_attr(name = "class") %>%
       magrittr::equals("txt_barre") %>%
       purrr::map_lgl(isTRUE)
     
     raw_subextract %<>%
       magrittr::extract(!is_cancelled) %>%
-      rvest::html_nodes(css = "a") %>%
+      rvest::html_elements(css = "a") %>%
       # workaround to remove spurious 2006-11-26 link in 2005 page
       magrittr::extract(rvest::html_text(.) != "")
     
@@ -2088,17 +2088,17 @@ scrape_geneva_referendum_dates_between_2007_2014 <- function(year) {
   raw_extract <-
     xml2::read_html(x = paste0("https://www.ge.ch/votations/", year, ".asp"),
                     encoding = "windows-1252") %>%
-    rvest::html_nodes(css = "#texte_bordure")
+    rvest::html_elements(css = "#texte_bordure")
   
   vote_locations_temp <-
     raw_extract %>%
-    rvest::html_nodes(css = "h5") %>%
+    rvest::html_elements(css = "h5") %>%
     rvest::html_text() %>%
     stringr::str_trim() %>%
     stringr::str_extract(pattern = "(?<=\\s)\\S+$")
   
   raw_extract %<>%
-    rvest::html_nodes(css = "ul")
+    rvest::html_elements(css = "ul")
   
   level <-
     raw_extract %>%
@@ -2119,8 +2119,8 @@ scrape_geneva_referendum_dates_between_2007_2014 <- function(year) {
       
       ballot_date <-
         raw_extract[[i]] %>%
-        rvest::html_nodes(css = "li") %>%
-        rvest::html_nodes(css = "a") %>%
+        rvest::html_elements(css = "li") %>%
+        rvest::html_elements(css = "a") %>%
         rvest::html_attr(name = "href") %>%
         stringr::str_extract(pattern = "\\d{8}") %>%
         lubridate::ymd()
@@ -2129,12 +2129,12 @@ scrape_geneva_referendum_dates_between_2007_2014 <- function(year) {
       
       raw_subextract <-
         raw_extract[[i]] %>%
-        rvest::html_nodes(css = "li")
+        rvest::html_elements(css = "li")
       
       # exclude cancelled proposals (formatted struck through)
       is_cancelled <-
         raw_subextract %>%
-        rvest::html_node(css = "span") %>%
+        rvest::html_element(css = "span") %>%
         rvest::html_attr(name = "class") %>%
         magrittr::equals("txt_barre") %>%
         purrr::map_lgl(isTRUE)
@@ -2174,8 +2174,8 @@ scrape_geneva_referendum_dates_after_2014 <- function(year) {
   raw_extract <-
     xml2::read_html(x = "https://www.ge.ch/votations/welcome.asp",
                     encoding = "windows-1252") %>%
-    rvest::html_nodes(css = "#texte_bordure") %>%
-    rvest::html_nodes(css = "ul")
+    rvest::html_elements(css = "#texte_bordure") %>%
+    rvest::html_elements(css = "ul")
   
   is_relevant_year <-
     raw_extract %>%
@@ -2187,7 +2187,7 @@ scrape_geneva_referendum_dates_after_2014 <- function(year) {
   
   raw_extract %<>%
     magrittr::extract(is_relevant_year) %>%
-    rvest::html_nodes(css = "li")
+    rvest::html_elements(css = "li")
   
   referendum_dates <- get_geneva_referendum_dates_skeleton()
   
@@ -2196,7 +2196,7 @@ scrape_geneva_referendum_dates_after_2014 <- function(year) {
     
     href <-
       raw_extract[i] %>%
-      rvest::html_nodes(css = "a") %>%
+      rvest::html_elements(css = "a") %>%
       rvest::html_attr(name = "href")
     
     # skip dates lacking a link to a subpage (supposedly preliminary)
@@ -2237,16 +2237,16 @@ scrape_geneva_referendum_date_between_2014_mid_2018 <- function(ballot_date,
     xml2::read_html(x = url,
                     # subpage format has changed from 2018-09-23 onwards
                     encoding = "windows-1252") %>%
-    rvest::html_nodes(css = "#texte_bordure")
+    rvest::html_elements(css = "#texte_bordure")
   
   vote_locations <-
     raw_extract %>%
-    rvest::html_nodes(css = "h4") %>%
+    rvest::html_elements(css = "h4") %>%
     rvest::html_text() %>%
     stringr::str_trim() %>%
     stringr::str_extract(pattern = "(?<=\\s)\\S+$")
   
-  raw_extract %<>% rvest::html_nodes(css = "ul")
+  raw_extract %<>% rvest::html_elements(css = "ul")
   
   level <-
     raw_extract %>%
@@ -2262,12 +2262,12 @@ scrape_geneva_referendum_date_between_2014_mid_2018 <- function(ballot_date,
       
       raw_subextract <-
         raw_extract[i] %>%
-        rvest::html_nodes(css = "li")
+        rvest::html_elements(css = "li")
       
       # exclude cancelled proposals (formatted struck through)
       is_cancelled <-
         raw_subextract %>%
-        rvest::html_node(css = "span") %>%
+        rvest::html_element(css = "span") %>%
         rvest::html_attr(name = "class") %>%
         magrittr::equals("txt_barre") %>%
         purrr::map_lgl(isTRUE)
@@ -2316,8 +2316,8 @@ scrape_geneva_referendum_date_after_mid_2018 <- function(ballot_date,
   # get all "objet_*" selectors
   objet_selectors <-
     raw_extract %>%
-    rvest::html_nodes(css = ".container") %>%
-    rvest::html_nodes(css = "*") %>%
+    rvest::html_elements(css = ".container") %>%
+    rvest::html_elements(css = "*") %>%
     rvest::html_attr("id") %>%
     unique() %>%
     magrittr::extract(stringr::str_detect(string = .,
@@ -2327,8 +2327,8 @@ scrape_geneva_referendum_date_after_mid_2018 <- function(ballot_date,
   
   vote_locations <-
     raw_extract %>%
-    rvest::html_nodes(css = ".container") %>%
-    rvest::html_nodes(css = "h2") %>%
+    rvest::html_elements(css = ".container") %>%
+    rvest::html_elements(css = "h2") %>%
     rvest::html_text() %>%
     magrittr::extract(!stringr::str_detect(string = .,
                                            pattern = "(?i)(documentation|(f\u00e9d\u00e9ra|cantona)(l|ux))")) %>%
@@ -2343,15 +2343,15 @@ scrape_geneva_referendum_date_after_mid_2018 <- function(ballot_date,
   
   subjects <-
     raw_extract %>%
-    rvest::html_nodes(css = paste0(objet_selectors, collapse = ","))
+    rvest::html_elements(css = paste0(objet_selectors, collapse = ","))
   
   subjects <-
     subjects %>%
-    rvest::html_nodes(css = "strong") %>%
+    rvest::html_elements(css = "strong") %>%
     rvest::html_text() %>%
     stringr::str_squish() %>%
     paste(subjects %>%
-            rvest::html_nodes(css = "small") %>%
+            rvest::html_elements(css = "small") %>%
             rvest::html_text() %>%
             stringr::str_squish(),
           sep = " \u2013 ")
@@ -2389,9 +2389,9 @@ get_geneva_election_dates <- function() {
   raw_extract <-
     xml2::read_html(x = "https://www.ge.ch/elections/",
                     encoding = "UTF-8") %>%
-    rvest::html_nodes(css = ".liste-lien") %>%
-    rvest::html_nodes(css = "li") %>%
-    rvest::html_nodes(css = "a") %>%
+    rvest::html_elements(css = ".liste-lien") %>%
+    rvest::html_elements(css = "li") %>%
+    rvest::html_elements(css = "a") %>%
     # remove erroneous 2nd link @ 1993-10-17 (only visible in source)
     magrittr::extract(-72L)
   
@@ -2493,17 +2493,17 @@ get_geneva_municipal_election_dates <- function() {
       # handle "normal" subpage layout
       try_to_match <-
         raw_extract %>%
-        rvest::html_nodes(css = ".liste-lien") %>%
-        rvest::html_nodes(css = "li") %>%
-        rvest::html_nodes(css = "a")
+        rvest::html_elements(css = ".liste-lien") %>%
+        rvest::html_elements(css = "li") %>%
+        rvest::html_elements(css = "a")
       
       # handle different subpage layout (e.g. 2007-06-03)
       if (length(try_to_match) == 0L) {
         
         try_to_match <-
           raw_extract %>%
-          rvest::html_nodes(css = ".content") %>%
-          rvest::html_nodes(css = "h2")
+          rvest::html_elements(css = ".content") %>%
+          rvest::html_elements(css = "h2")
       }
       
       try_to_match %<>%
@@ -2525,9 +2525,9 @@ get_geneva_municipal_election_dates <- function() {
         # handle yet another subpage layout (-> one level deeper)
         subpage_links <-
           raw_extract %>%
-          rvest::html_nodes(css = ".liste-lien") %>%
-          rvest::html_nodes(css = "li") %>%
-          rvest::html_nodes(css = "a") %>%
+          rvest::html_elements(css = ".liste-lien") %>%
+          rvest::html_elements(css = "li") %>%
+          rvest::html_elements(css = "a") %>%
           rvest::html_attr(name = "href") %>%
           purrr::map_chr(~ paste0(election_dates$link[i], .x))
         
@@ -2538,8 +2538,8 @@ get_geneva_municipal_election_dates <- function() {
           
           new_subject_summary <-
             raw_extract %>%
-            rvest::html_nodes(css = ".content") %>%
-            rvest::html_nodes(css = "h2") %>%
+            rvest::html_elements(css = ".content") %>%
+            rvest::html_elements(css = "h2") %>%
             rvest::html_text() %>%
             stringr::str_squish()
           
@@ -2554,9 +2554,9 @@ get_geneva_municipal_election_dates <- function() {
           
           try_to_match <-
             raw_extract %>%
-            rvest::html_nodes(css = ".liste-lien") %>%
-            rvest::html_nodes(css = "li") %>%
-            rvest::html_nodes(css = "a") %>%
+            rvest::html_elements(css = ".liste-lien") %>%
+            rvest::html_elements(css = "li") %>%
+            rvest::html_elements(css = "a") %>%
             rvest::html_text() %>%
             stringr::str_squish()
           
@@ -2882,7 +2882,7 @@ get_zurich_municipal_dates_generic_iweb_1 <- function(municipality,
     raw_extract <-
       xml2::read_html(x = paste0(base_url, "&niveau=", municipal_type),
                       encoding = "windows-1252") %>%
-      rvest::html_nodes(css = "table") %>%
+      rvest::html_elements(css = "table") %>%
       dplyr::last() %>%
       rvest::html_table()
     
@@ -2917,17 +2917,17 @@ get_zurich_municipal_dates_generic_iweb_2 <- function(municipality,
   
   data <-
     xml2::read_html(glue::glue("{base_url}/abstimmungen/vorlagen")) %>%
-    rvest::html_nodes("table") %>%
-    rvest::html_nodes("tbody") %>%
+    rvest::html_elements("table") %>%
+    rvest::html_elements("tbody") %>%
     # 1st table contains referendums, 2nd table contains elections
     purrr::map(~ {
       
-      rvest::html_nodes(x = .x,
+      rvest::html_elements(x = .x,
                         css = "tr") %>%
         purrr::map_dfr(~ {
           
           # 1st cell contains date, 2nd cell contains href and subject
-          cells <- rvest::html_nodes(x = .x,
+          cells <- rvest::html_elements(x = .x,
                                      css = "td")
           tibble::tibble(ballot_date =
                            cells[[1]] %>%
@@ -2935,11 +2935,11 @@ get_zurich_municipal_dates_generic_iweb_2 <- function(municipality,
                            lubridate::as_date(),
                          subject =
                            cells[[2]] %>%
-                           rvest::html_node(css = "a") %>%
+                           rvest::html_element(css = "a") %>%
                            rvest::html_text(),
                          url =
                            cells[[2]] %>%
-                           rvest::html_node(css = "a") %>%
+                           rvest::html_element(css = "a") %>%
                            rvest::html_attr("href") %>%
                            paste0(base_url, .))
         })
@@ -2969,7 +2969,7 @@ get_zurich_municipal_dates_boppelsen <- function() {
   raw_extract <-
     xml2::read_html(x = "http://www.boppelsen.ch/gemeinde/politik/wahlen/archiv/default.htm",
                     encoding = "windows-1252") %>%
-    rvest::html_nodes(css = ".portletDocumentListWrapper")
+    rvest::html_elements(css = ".portletDocumentListWrapper")
   
   ballot_dates <- tibble::tibble(ballot_date = lubridate::as_date(integer()),
                                  municipality = character(),
@@ -2978,7 +2978,7 @@ get_zurich_municipal_dates_boppelsen <- function() {
   
   summary_texts <-
     raw_extract %>%
-    rvest::html_nodes(css = "h3") %>%
+    rvest::html_elements(css = "h3") %>%
     rvest::html_text()
   
   dates <-
@@ -2989,14 +2989,14 @@ get_zurich_municipal_dates_boppelsen <- function() {
   is_election_date <- stringr::str_detect(string = summary_texts,
                                           pattern = "(?i)wahl")
   
-  raw_extract %<>% rvest::html_nodes(css = "ul")
+  raw_extract %<>% rvest::html_elements(css = "ul")
   
   for (i in seq_along(dates)) {
     
     subject_part <-
       raw_extract[[i]] %>%
-      rvest::html_nodes(css = "li") %>%
-      rvest::html_nodes(css = "a") %>%
+      rvest::html_elements(css = "li") %>%
+      rvest::html_elements(css = "a") %>%
       rvest::html_attr(name = "title") %>%
       # filter non-municipal subjects
       magrittr::extract(!stringr::str_detect(string = .,
@@ -3033,27 +3033,27 @@ get_zurich_municipal_dates_buelach <- function() {
   raw_extract <-
     xml2::read_html(x = "https://www.buelach.ch/themen/politik-verwaltung/wahlen-und-abstimmungen/abstimmungen-und-wahlen-resultate",
                     encoding = "UTF-8") %>%
-    rvest::html_nodes(css = ".element") %>%
-    rvest::html_nodes(css = ".list") %>%
+    rvest::html_elements(css = ".element") %>%
+    rvest::html_elements(css = ".list") %>%
     dplyr::first() %>%
-    rvest::html_nodes(css = "ul") %>%
-    rvest::html_nodes(css = "li")
+    rvest::html_elements(css = "ul") %>%
+    rvest::html_elements(css = "li")
   
   tibble::tibble(ballot_date =
                    raw_extract %>%
-                   rvest::html_nodes(css = ".date") %>%
+                   rvest::html_elements(css = ".date") %>%
                    rvest::html_text() %>%
                    lubridate::dmy(),
                  municipality = "B\u00fclach",
                  subject_summary =
                    raw_extract %>%
-                   rvest::html_nodes(css = ".title") %>%
+                   rvest::html_elements(css = ".title") %>%
                    rvest::html_text(),
                  is_election_date = stringr::str_detect(string = subject_summary,
                                                         pattern = "(?i)wahl"),
                  url =
                    raw_extract %>%
-                   rvest::html_nodes("a") %>%
+                   rvest::html_elements("a") %>%
                    rvest::html_attr(name = "href") %>%
                    paste0("https://www.buelach.ch/", .)) %>%
     dplyr::transmute(ballot_date, municipality, is_election_date, subject_summary, url) %>%
@@ -3117,28 +3117,28 @@ get_zurich_municipal_dates_maur <- function() {
                        newsSearchParams.dateTo = ""),
            encode = "form") %>%
     xml2::read_html(encoding = "UTF-8") %>%
-    rvest::html_node(".news-lst-archive") %>%
-    rvest::html_nodes("li")
+    rvest::html_element(".news-lst-archive") %>%
+    rvest::html_elements("li")
   
   # NOTE: The structure of the returned list is crap! The <time> is just the publication time of the "news entry" and does NOT necessarily match the ballot
   #       date. It's also impossible to extract the actual ballot date from the `subject_summary` for certain entries (e.g. the "Ersatzwahl des Notars
   #       beziehungsweise der Notarin für den Rest der Amtsdauer 2018–2022"), so we don't even try...
   tibble::tibble(ballot_date =
                    raw_extract %>%
-                   rvest::html_nodes("time") %>%
+                   rvest::html_elements("time") %>%
                    rvest::html_attr("datetime") %>%
                    stringr::str_extract("\\d{4}-\\d{2}-\\d{2}") %>%
                    lubridate::as_date(),
                  municipality = "Maur",
                  subject_summary =
                    raw_extract %>%
-                   rvest::html_nodes("a") %>%
+                   rvest::html_elements("a") %>%
                    rvest::html_text(),
                  is_election = stringr::str_detect(string = subject_summary,
                                                    pattern = "(?i)wahl"),
                  url =
                    raw_extract %>%
-                   rvest::html_nodes("a") %>%
+                   rvest::html_elements("a") %>%
                    rvest::html_attr("href")) %>%
     dplyr::select(ballot_date, municipality, is_election, subject_summary, url) %>%
     dplyr::arrange(ballot_date, is_election)
@@ -3199,8 +3199,8 @@ get_zurich_municipal_dates_winterthur <- function() {
   
   raw_extract <-
     xml2::read_html("https://wahlen.winterthur.ch/archiv/vote-action/archive/vote-controller/ElectionDay/vote-year/9999/") %>%
-    rvest::html_nodes(css = ".electionday-list") %>%
-    rvest::html_nodes(css = ".row")
+    rvest::html_elements(css = ".electionday-list") %>%
+    rvest::html_elements(css = ".row")
   
   ballot_dates <- tibble::tibble(ballot_date = lubridate::as_date(integer()),
                                  municipality = character(),
@@ -3210,7 +3210,7 @@ get_zurich_municipal_dates_winterthur <- function() {
   for (i in seq_along(raw_extract)) {
     
     if (raw_extract[[i]] %>%
-        rvest::html_nodes(css = ".col-8") %>%
+        rvest::html_elements(css = ".col-8") %>%
         rvest::html_text() %>%
         stringr::str_squish() %>%
         magrittr::equals("Es sind noch keine Wahlen/Abstimmungen vorhanden") %>%
@@ -3218,16 +3218,16 @@ get_zurich_municipal_dates_winterthur <- function() {
       
       ballot_dates %<>% tibble::add_row(ballot_date =
                                           raw_extract[[i]] %>%
-                                          rvest::html_nodes(css = ".col-4") %>%
+                                          rvest::html_elements(css = ".col-4") %>%
                                           rvest::html_text() %>%
                                           stringr::str_extract(pattern = "\\d+\\.\\d+\\.\\d{4}") %>%
                                           lubridate::dmy(),
                                         municipality = "Winterthur",
                                         subject =
                                           raw_extract[[i]] %>%
-                                          rvest::html_nodes(css = ".col-8") %>%
-                                          rvest::html_nodes(css = "ul") %>%
-                                          rvest::html_nodes(css = "li") %>%
+                                          rvest::html_elements(css = ".col-8") %>%
+                                          rvest::html_elements(css = "ul") %>%
+                                          rvest::html_elements(css = "li") %>%
                                           rvest::html_text() %>%
                                           stringr::str_squish())
     }

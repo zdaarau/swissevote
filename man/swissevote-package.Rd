@@ -4,14 +4,9 @@
 \name{swissevote-package}
 \alias{swissevote}
 \alias{swissevote-package}
-\title{swissevote: Provides Functions Around the Swiss E-Voting Trial Data Collected
-    by the Centre for Democracy Studies Aarau (ZDA)}
+\title{swissevote: Provides Functions Around the Swiss E-Voting Trial Data Collected by the Centre for Democracy Studies Aarau (ZDA)}
 \description{
-swissevote can parse cantonal voting register data, scrape
-    authority websites for ballot data and provides other auxiliary
-    functions around the Swiss e-voting trial data collected by the Centre
-    for Democracy Studies Aarau (ZDA) at the University of Zurich,
-    Switzerland.
+swissevote can parse cantonal voting register data, scrape authority websites for ballot data and provides other auxiliary functions around the Swiss e-voting trial data collected by the Centre for Democracy Studies Aarau (ZDA) at the University of Zurich, Switzerland.
 }
 \section{Package options}{
 

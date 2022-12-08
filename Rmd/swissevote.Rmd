@@ -291,8 +291,8 @@ ballot_dates_federal_neuchatel <- function(exclude_counterproposals = FALSE) {
     stringr::str_squish() %>%
     stringr::str_replace(pattern = "^(.+?)( - \\d+?\\.\\d+?\\.\\d+)( )(\\(.+?\\))$",
                          replacement = "\\1 \\4\\2") %>%
-    stringr::str_split(pattern = " - (?=\\d+?\\.\\d+?.\\d+?$)",
-                       simplify = TRUE) %>%
+    stringr::str_split_fixed(pattern = " - (?=\\d+?\\.\\d+?.\\d+?$)",
+                             n = 2L) %>%
     magrittr::set_colnames(c("subject", "ballot_date")) %>%
     tibble::as_tibble() %>%
     dplyr::transmute(ballot_date = lubridate::dmy(ballot_date),
@@ -388,8 +388,7 @@ ballot_dates_latest_neuchatel <- function() {
         stringr::str_squish() %>%
         stringr::str_replace(pattern = "^(.+?)( - \\d+?\\.\\d+?\\.\\d+)( )(\\(.+?\\))$",
                              replacement = "\\1 \\4\\2") %>%
-        stringr::str_split(pattern = " - (?=\\d+?\\.\\d+?.\\d+?$)",
-                           simplify = FALSE) %>%
+        stringr::str_split(pattern = " - (?=\\d+?\\.\\d+?.\\d+?$)") %>%
         purrr::flatten_chr()
       
       ballot_dates %<>% tibble::add_row(ballot_date = lubridate::dmy(text_i[2L]),
@@ -1850,8 +1849,7 @@ get_zurich_referendum_dates <- function(exclude_counterproposals = FALSE) {
                        paste0(collapse = "\n") %>%
                        xml2::read_html() %>%
                        rvest::html_text() %>%
-                       stringr::str_split(pattern = "\n") %>%
-                       unlist() %>%
+                       stringr::str_split_1(pattern = "\n") %>%
                        stringr::str_squish(),
                      type = V5,
                      turnout =

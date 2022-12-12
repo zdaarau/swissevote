@@ -31,6 +31,8 @@ Time-consuming operations like reading in the raw datasets or scraping ballot da
 
 ## Documentation
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/ce410db6-b85a-4707-9358-f0d3449398c3/deploy-status)](https://app.netlify.com/sites/swissevote-rpkg-dev/deploys)
+
 The documentation of this package is found [here](https://pal.rpkg.dev).
 
 ## Installation

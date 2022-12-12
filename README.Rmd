@@ -44,7 +44,10 @@ Time-consuming operations like reading in the raw datasets or scraping ballot da
 #| results: asis
 #| echo: false
 pkgsnip::md_snip(name = "pkgdown_notice") %>%
-  paste0("## Documentation\n\n", .) %>%
+  paste0("## Documentation\n\n",
+         "[![Netlify Status](https://api.netlify.com/api/v1/badges/ce410db6-b85a-4707-9358-f0d3449398c3/deploy-status)]",
+         "(https://app.netlify.com/sites/swissevote-rpkg-dev/deploys)\n\n",
+         .) %>%
   pal::cat_lines()
 ```
 

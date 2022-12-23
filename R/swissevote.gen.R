@@ -171,17 +171,22 @@ e_voting_cantons <- tibble::tribble(
 
 opts <- function(pretty_colnames = FALSE) {
   
-  tibble::tribble(
+  checkmate::assert_flag(pretty_colnames)
+  
+  opts <- tibble::tribble(
     ~name, ~description, ~is_auto_init,
     "swissevote.path_raw_data", paste0("the path to the directory holding the cantonal raw data files (which are not part of this package due to legal ",
                                        "restrictions and/or concerns regarding voter privacy); see the package's ",
                                        "[README](https://gitlab.com/zdaarau/rpkgs/swissevote#raw-data-files) for more details; only set automatically for ",
                                        "user=salim"), TRUE,
     "swissevote.global_cache_lifespan", "the default cache lifespan for all functions taking a `cache_lifespan` argument; defaults to 30 days", TRUE,
-  ) %>%
-    purrr::when(checkmate::assert_flag(pretty_colnames) ~ dplyr::rename(.data = .,
-                                                                        "set automatically during package load" = is_auto_init),
-                ~ .)
+  )
+  
+  if (pretty_colnames) {
+    opts %<>% dplyr::rename("set automatically during package load" = is_auto_init)
+  }
+  
+  opts
 }
 
 regex_counterproposal_fr <- "(?i)(co?n?tre-?projet(?!\\s(direct|relatif))|question\\ssubsidiaire)"
@@ -615,7 +620,7 @@ get_federal_elected_power_name <- function(federal_elected_power) {
 
 get_elected_power_name <- function(elected_power) {
   
-  switch(EXPR = as.character(elected_power),
+  result <- switch(EXPR = as.character(elected_power),
          "0" = "none",
          "1" = "legislature",
          "2" = "executive",
@@ -624,9 +629,13 @@ get_elected_power_name <- function(elected_power) {
          "5" = c("legislature", "judiciary"),
          "6" = c("executive", "judiciary"),
          "7" = c("legislature", "executive", "judiciary"),
-         NA_character_) %>%
-    purrr::when(is.na(.) ~ .,
-                ~ paste0(collapse = " & "))
+         NA_character_)
+  
+  if (!is.na(result)) {
+    result %<>% paste0(collapse = " & ")
+  }
+  
+  result
 }
 
 get_election_procedure_name <- function(election_procedure) {

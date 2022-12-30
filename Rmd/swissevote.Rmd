@@ -394,7 +394,7 @@ ballot_dates_latest_neuchatel <- function() {
         stringr::str_replace(pattern = "^(.+?)( - \\d+?\\.\\d+?\\.\\d+)( )(\\(.+?\\))$",
                              replacement = "\\1 \\4\\2") %>%
         stringr::str_split(pattern = " - (?=\\d+?\\.\\d+?.\\d+?$)") %>%
-        purrr::flatten_chr()
+        purrr::list_c(ptype = character())
       
       ballot_dates %<>% tibble::add_row(ballot_date = lubridate::dmy(text_i[2L]),
                                         level = level_i,
@@ -569,7 +569,7 @@ determine_3_code_combo <- function(...) {
   
   input_codes <-
     rlang::list2(...) %>%
-    purrr::flatten_dbl() %>%
+    purrr::list_c(ptype = double()) %>%
     as.integer()
   
   combined_code <- NA_integer_
@@ -610,7 +610,7 @@ determine_7_code_combo <- function(...) {
   
   input_codes <-
     rlang::list2(...) %>%
-    purrr::flatten_dbl() %>%
+    purrr::list_c(ptype = double()) %>%
     as.integer()
   
   combined_code <- NA_integer_
@@ -682,7 +682,7 @@ combine_group <- function(...) {
   
   input_codes <-
     rlang::list2(...) %>%
-    purrr::flatten_dbl() %>%
+    purrr::list_c(ptype = double()) %>%
     as.integer()
   
   combined_code <- NA_integer_
@@ -2391,11 +2391,11 @@ get_zurich_municipal_dates_generic_iweb_2 <- function(municipality,
       
       rvest::html_elements(x = .x,
                         css = "tr") %>%
-        purrr::map_dfr(~ {
+        purrr::map(~ {
           
           # 1st cell contains date, 2nd cell contains href and subject
           cells <- rvest::html_elements(x = .x,
-                                     css = "td")
+                                        css = "td")
           tibble::tibble(ballot_date =
                            cells[[1]] %>%
                            rvest::html_attr("data-order") %>%
@@ -2409,7 +2409,8 @@ get_zurich_municipal_dates_generic_iweb_2 <- function(municipality,
                            rvest::html_element(css = "a") %>%
                            rvest::html_attr("href") %>%
                            paste0(base_url, .))
-        })
+        }) %>%
+        purrr::list_rbind()
     })
   
   # merge referendum and election tables
@@ -2459,8 +2460,9 @@ merge_municipalities_by_canton <- function(data_canton) {
     data_canton %>%
       dplyr::group_by(date) %>%
       dplyr::group_split() %>%
-      purrr::map_dfr(merge_municipalities_by_canton_date,
-                     mutations_relevant = mutations_relevant)
+      purrr::map(merge_municipalities_by_canton_date,
+                 mutations_relevant = mutations_relevant) %>%
+      purrr::list_rbind()
     
   } else {
     data_canton
@@ -2496,10 +2498,11 @@ merge_municipalities_by_canton_date <- function(data_canton_date,
         data_canton_date[ix_daughter, ] %>%
         dplyr::group_by(group) %>%
         dplyr::group_split() %>%
-        purrr::map_dfr(merge_municipalities_helper,
-                       municipality_code_new = unique(mutations_daughter$TerminalCode),
-                       municipality_new = unique(mutations_daughter$TerminalName),
-                       target_colnames = colnames(data_canton_date))
+        purrr::map(merge_municipalities_helper,
+                   municipality_code_new = unique(mutations_daughter$TerminalCode),
+                   municipality_new = unique(mutations_daughter$TerminalName),
+                   target_colnames = colnames(data_canton_date)) %>%
+        purrr::list_rbind()
       
       data_canton_date %<>%
         dplyr::filter(!(dplyr::row_number() %in% ix_daughter)) %>%
@@ -3559,6 +3562,7 @@ merge_municipalities <- function(data) {
   data %>%
     dplyr::group_by(canton) %>%
     dplyr::group_split() %>%
-    purrr::map_dfr(merge_municipalities_by_canton)
+    purrr::map(merge_municipalities_by_canton) %>%
+    purrr::list_rbind()
 }
 ```

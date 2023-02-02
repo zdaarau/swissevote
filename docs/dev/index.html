@@ -8,8 +8,8 @@
 <meta name="description" content="swissevote can parse cantonal voting register data, scrape authority websites for ballot data and provides other auxiliary functions around the Swiss e-voting trial data collected by the Centre for Democracy Studies Aarau (ZDA) at the University of Zurich, Switzerland.">
 <title>Provides Functions Around the Swiss E-Voting Trial Data Collected by the Centre for Democracy Studies Aarau (ZDA) • swissevote</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.1.3/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.1.3/bootstrap.bundle.min.js"></script><link rel="stylesheet" href="deps/all.min.css">
+<link href="deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><link rel="stylesheet" href="deps/all.min.css">
 <link rel="stylesheet" href="deps/v4-shims.min.css">
 <script src="deps/bootstrap-toc.min.js"></script><script src="deps/headroom.min.js"></script><script src="deps/jQuery.headroom.min.js"></script><script src="deps/clipboard.min.js"></script><script src="deps/fuse.js"></script><script src="deps/autocomplete.jquery.min.js"></script><script src="deps/mark.min.js"></script><script src="deps/MathJax.js"></script><script src="deps/TeX-AMS-MML_HTMLorMML.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Provides Functions Around the Swiss E-Voting Trial Data Collected by the Centre for Democracy Studies Aarau (ZDA)">
 <meta property="og:description" content="swissevote can parse cantonal voting register data, scrape authority websites for ballot data and provides other auxiliary functions around the Swiss e-voting trial data collected by the Centre for Democracy Studies Aarau (ZDA) at the University of Zurich, Switzerland.">
@@ -73,16 +73,16 @@
 <h3 id="raw-data-files">Raw data files<a class="anchor" aria-label="anchor" href="#raw-data-files"></a>
 </h3>
 <p>The <strong>cantonal raw data files</strong> are <em>not</em> included in this package due to legal restrictions and/or concerns regarding voter privacy and thus <strong>have to be provided by the user</strong>. The path to the folder holding these files must be set in the <a href="https://rdrr.io/r/base/options.html" class="external-link">R option</a> <strong><code>swissevote.path_raw_data</code></strong> and the files under this path are expected to be organized and named in the following way:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode fs"><code class="sourceCode fsharp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">[</span>swissevote.path_raw_data<span class="op">]</span>/</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>├──BE/</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>|  ├──BE_YYYY-MM-DD<span class="kw">.</span>EXT</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>|  └──...</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>├──GE/</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>|  ├──vYYYYNN.EXT</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>|  └──...</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>└──NE/</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>   ├──NE_YYYY-MM-DD<span class="kw">.</span>EXT</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>   └──...</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode fs"><code class="sourceCode fsharp"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="op">[</span>swissevote.path_raw_data<span class="op">]</span>/</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>├──BE/</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>|  ├──BE_YYYY-MM-DD<span class="kw">.</span>EXT</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>|  └──...</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>├──GE/</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>|  ├──vYYYYNN.EXT</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>|  └──...</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>└──NE/</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>   ├──NE_YYYY-MM-DD<span class="kw">.</span>EXT</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>   └──...</span></code></pre></div>
 <p>The Genevan raw data files must be named according to the column <code>filename</code> in <code>swissevote:::metadata_geneva_raw_datasets</code> (which has been defined by the Geneva State Chancellery). Raw data files from the other cantons must be named by the canton abbreviation and the ballot date (e.g. <code>NE_2019-02-10</code>).</p>
 </div>
 <div class="section level3">

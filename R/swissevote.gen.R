@@ -503,16 +503,24 @@ determine_7_code_combo <- function(...) {
       # handle remaining combinations
     } else {
       
-      combined_code <- dplyr::case_when(7L %in% all_codes
-                                        | all(all_codes > 3L)
-                                        | all(c(1L, 6L) %in% all_codes)
-                                        | all(c(2L, 5L) %in% all_codes)
-                                        | all(c(3L, 4L) %in% all_codes)
-                                        | all(c(1L, 2L, 3L) %in% all_codes)
-                                        | all(c(1L, 4L, 5L) %in% all_codes) ~ 7L,
-                                        all(all_codes %in% c(2L, 3L, 6L)) ~ 6L,
-                                        all(all_codes %in% c(1L, 3L, 5L)) ~ 5L,
-                                        all(all_codes %in% c(1L, 2L, 4L)) ~ 4L)
+      combined_code <-
+        if (7L %in% all_codes ||
+            all(all_codes > 3L) ||
+            all(c(1L, 6L) %in% all_codes) ||
+            all(c(2L, 5L) %in% all_codes) ||
+            all(c(3L, 4L) %in% all_codes) ||
+            all(c(1L, 2L, 3L) %in% all_codes) ||
+            all(c(1L, 4L, 5L) %in% all_codes)) {
+          7L
+        } else if (all(all_codes %in% c(2L, 3L, 6L))) {
+          6L
+        } else if (all(all_codes %in% c(1L, 3L, 5L))) {
+          5L
+        } else if (all(all_codes %in% c(1L, 2L, 4L))) {
+          4L
+        } else {
+          cli::cli_abort("Undefined. Please debug.")
+        }
     }
   }
   
@@ -563,13 +571,20 @@ combine_group <- function(...) {
       # handle remaining combinations
     } else {
       
-      combined_code <- dplyr::case_when(6L %in% all_codes
-                                        | all(c(2L, 5L) %in% all_codes)
-                                        | all(c(3L, 4L) %in% all_codes)
-                                        | all(c(4L, 5L) %in% all_codes)
-                                        | all(c(1L, 2L, 3L) %in% all_codes) ~ 6L,
-                                        all(all_codes %in% c(1L, 3L, 5L)) ~ 5L,
-                                        all(all_codes %in% c(1L, 2L, 4L)) ~ 4L)
+      combined_code <-
+        if (6L %in% all_codes ||
+            all(c(2L, 5L) %in% all_codes) ||
+            all(c(3L, 4L) %in% all_codes) ||
+            all(c(4L, 5L) %in% all_codes) ||
+            all(c(1L, 2L, 3L) %in% all_codes)) {
+          6L
+        } else if (all(all_codes %in% c(1L, 3L, 5L))) {
+          5L
+        } else if (all(all_codes %in% c(1L, 2L, 4L))) {
+          4L
+        } else {
+          cli::cli_abort("Undefined. Please debug.")
+        }
     }
     
     combined_code
@@ -749,7 +764,7 @@ get_neuchatel_municipal_ballot_dates <- function(exclude_counterproposals = FALS
     # - split "Val-de-Travers" into "Boveresse", "Buttes", "Couvet", "Fleurier", "Les Bayards", "M\u00f4tiers", "Noiraigue", "Saint-Sulpice" & "Travers"
     dplyr::mutate(municipality = dplyr::case_when(municipality == "La T\u00e8ne" & ballot_date == "2008-06-22" ~ "Marin-Epagnier",
                                                   municipality == "Val-de-Travers" & ballot_date == "2008-06-22" ~ "Boveresse",
-                                                  TRUE ~ municipality)) %>%
+                                                  .default = municipality)) %>%
     tibble::add_row(ballot_date = lubridate::as_date("2008-06-22"),
                     municipality = c("Thielle-Wavre",
                                      "Couvet",
@@ -2377,7 +2392,7 @@ read_raw_dataset_geneva <- function(filename,
   # add binary variable `has_voted`
   data_raw %<>% dplyr::mutate(has_voted = dplyr::case_when(is.na(vote_date) ~ NA,
                                                            !(as.integer(vote_date) %in% c(19000101L, 0L)) ~ TRUE,
-                                                           TRUE ~ FALSE))
+                                                           .default = FALSE))
   
   # add binary variable `is_swiss_living_abroad`
   ## check if there are entries with no `municipality_code_2_digits` (`NA`)
@@ -2598,7 +2613,7 @@ read_raw_data_neuchatel <- function(ballot_date) {
   ## add binary variable `is_foreigner`
   data_raw$is_foreigner <- dplyr::case_when(is.na(data_raw$nationality) ~ NA,
                                             data_raw$nationality == "Suisse" ~ FALSE,
-                                            TRUE ~ TRUE)
+                                            .default = TRUE)
   
   ## check for missing nationalities
   if (any(is.na(data_raw$is_foreigner))) {

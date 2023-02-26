@@ -9,7 +9,7 @@ read_raw_data(
   ballot_date,
   specific_datasets = NULL,
   use_cache = TRUE,
-  cache_lifespan = "7 days"
+  max_cache_age = "7 days"
 )
 }
 \arguments{
@@ -21,9 +21,9 @@ read_raw_data(
 filenames (without the filetype extension) as values. Setting \code{specific_datasets} is only sensible in case of \code{canton = "Geneva"} and thus ignored
 otherwise.}
 
-\item{use_cache}{Return cached results if possible. If \code{FALSE}, results are always newly fetched regardless of \code{cache_lifespan}.}
+\item{use_cache}{Return cached results if possible. If \code{FALSE}, results are always newly fetched regardless of \code{max_cache_age}.}
 
-\item{cache_lifespan}{The duration after which cached results are refreshed (i.e. newly fetched). A valid \link[lubridate:as.duration]{lubridate duration}. Only relevant if \code{use_cache = TRUE}.}
+\item{max_cache_age}{The duration after which cached results are refreshed (i.e. newly fetched). A valid \link[lubridate:as.duration]{lubridate duration}. Use \code{Inf} to disable cache expiry. Only relevant if \code{use_cache = TRUE}.}
 }
 \value{
 In case of \code{canton = "Geneva"}, a list with a tibble for each raw data file plus a metadata tibble. Otherwise a single tibble.

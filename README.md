@@ -27,7 +27,7 @@ The Genevan raw data files must be named according to the column `filename` in `
 
 ### Caching
 
-Time-consuming operations like reading in the raw datasets or scraping ballot dates from cantonal websites are cached to the local filesystem by default (using [pkgpins](https://pkgpins.rpkg.dev)). The maximum cache lifespan for all affected functions can be set in the global option **`swissevote.global_cache_lifespan`**[^1] (defaults to *30 days* if unset).
+Time-consuming operations like reading in the raw datasets or scraping ballot dates from cantonal websites are cached to the local filesystem by default (using [pkgpins](https://pkgpins.rpkg.dev)). The maximum cache age for all affected functions can be set in the R option **`swissevote.global_max_cache_age`**[^1] (defaults to *30 days* if unset).
 
 ## Documentation
 

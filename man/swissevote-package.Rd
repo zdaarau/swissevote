@@ -14,7 +14,7 @@ swissevote can parse cantonal voting register data, scrape authority websites fo
 The following package-specific R options are used to control the package's functionality:\tabular{lll}{
    \strong{name} \tab \strong{description} \tab \strong{set automatically during package load} \cr
    \code{swissevote.path_raw_data} \tab the path to the directory holding the cantonal raw data files (which are not part of this package due to legal restrictions and/or concerns regarding voter privacy); see the package's \href{https://gitlab.com/zdaarau/rpkgs/swissevote#raw-data-files}{README} for more details; only set automatically for user=salim \tab ✅ \cr
-   \code{swissevote.global_cache_lifespan} \tab the default cache lifespan for all functions taking a \code{cache_lifespan} argument; defaults to 30 days \tab ✅ \cr
+   \code{swissevote.global_max_cache_age} \tab the default maximum cache age for all functions taking a \code{max_cache_age} argument; defaults to 30 days \tab ✅ \cr
 }
 }
 

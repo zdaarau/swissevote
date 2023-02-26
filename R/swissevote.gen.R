@@ -14,31 +14,30 @@
 
 .onLoad <- function(libname, pkgname) {
   
-  .onLoad <- function(libname, pkgname) {
-    pkgpins::clear_cache(board = pkgpins::board(pkg = pkgname),
-                         max_age = getOption(paste0(pkgname, ".max_cache_lifespan"),
+  pkgpins::clear_cache(board = pkgpins::board(pkg = pkgname),
+                         max_age = getOption(paste0(pkgname, ".global_max_cache_age"),
                                              default = "30 days"))
-  }
   
   # set local path to Google Drive folder dependent on username
+  opt_path_raw_data <- getOption(paste0(pkgname, ".path_raw_data"))
   options(swissevote.path_raw_data = switch(EXPR = Sys.info()[["user"]],
                                             "salim" = "~/Arbeit/ZDA/Google Drive/edc-projekt/iVoting_dataset/Datenquellen/",
-                                            getOption("swissevote.path_raw_data")))
+                                            opt_path_raw_data))
   
   
   
-  if (is.null(getOption("swissevote.path_raw_data")) || is.na(getOption("swissevote.path_raw_data"))) {
+  if (is.null(opt_path_raw_data) || is.na(opt_path_raw_data)) {
     
-    cli::cli_alert_warning(message = msg_raw_data_path_unset)
+    cli::cli_alert_warning(text = msg_raw_data_path_unset)
     
   } else {
     
-    test_valid_path_raw_data <- checkmate::test_directory(getOption("swissevote.path_raw_data"),
+    test_valid_path_raw_data <- checkmate::test_directory(opt_path_raw_data,
                                                           access = "r")
     
     if (!isTRUE(test_valid_path_raw_data)) {
       
-      cli::cli_alert_warning(paste0("The option {.field swissevote.path_raw_data} is set to {.val {getOption('swissevote.path_raw_data')}}. ",
+      cli::cli_alert_warning(paste0("The option {.field swissevote.path_raw_data} is set to {.val {opt_path_raw_data}}. ",
                                     "This is not a valid path (with at least read access). Please correct this in order for this package to work properly."))
     }
   }
@@ -179,7 +178,7 @@ opts <- function(pretty_colnames = FALSE) {
                                        "restrictions and/or concerns regarding voter privacy); see the package's ",
                                        "[README](https://gitlab.com/zdaarau/rpkgs/swissevote#raw-data-files) for more details; only set automatically for ",
                                        "user=salim"), TRUE,
-    "swissevote.global_cache_lifespan", "the default cache lifespan for all functions taking a `cache_lifespan` argument; defaults to 30 days", TRUE,
+    "swissevote.global_max_cache_age", "the default maximum cache age for all functions taking a `max_cache_age` argument; defaults to 30 days", TRUE,
   )
   
   if (pretty_colnames) {
@@ -1936,7 +1935,7 @@ merge_municipalities_by_canton <- function(data_canton) {
   mutations <-
     swissmuni::mutations(start_date = start_date,
                          end_date = end_date,
-                         cache_lifespan = "1 week") %>%
+                         max_cache_age = "1 week") %>%
     # ensure data is ordered chronologically
     dplyr::arrange(MutationDate)
   
@@ -2714,7 +2713,7 @@ ballot_dates_raw_data <- function(canton = c("Bern", "Geneva", "Neuchatel")) {
 #'   filenames (without the filetype extension) as values. Setting `specific_datasets` is only sensible in case of `canton = "Geneva"` and thus ignored
 #'   otherwise.
 #' @param use_cache `r pkgsnip::param_label("use_cache")`
-#' @param cache_lifespan `r pkgsnip::param_label("cache_lifespan")`
+#' @param max_cache_age `r pkgsnip::param_label("max_cache_age")`
 #'
 #' @return In case of `canton = "Geneva"`, a list with a tibble for each raw data file plus a metadata tibble. Otherwise a single tibble.
 #' @export
@@ -2722,7 +2721,7 @@ read_raw_data <- function(canton = c("Bern", "Geneva", "Neuchatel"),
                           ballot_date,
                           specific_datasets = NULL,
                           use_cache = TRUE,
-                          cache_lifespan = "7 days") {
+                          max_cache_age = "7 days") {
   
   canton <- rlang::arg_match(canton)
   
@@ -2740,7 +2739,7 @@ read_raw_data <- function(canton = c("Bern", "Geneva", "Neuchatel"),
   ballot_date,
   specific_datasets,
   use_cache = use_cache,
-  cache_lifespan = cache_lifespan)
+  max_cache_age = max_cache_age)
 }
 
 #' Get federal ballot dates
@@ -2750,14 +2749,14 @@ read_raw_data <- function(canton = c("Bern", "Geneva", "Neuchatel"),
 #'   `source = "Zurich"` will return referendum dates back to the 19th century, while `source = "Neuchatel"` only goes back to the turn of the millennium.
 #' @param exclude_counterproposals Exclude indirect counterproposals and tie-breaker questions. A logical scalar.
 #' @param use_cache `r pkgsnip::param_label("use_cache")`
-#' @param cache_lifespan `r pkgsnip::param_label("cache_lifespan")`
+#' @param max_cache_age `r pkgsnip::param_label("max_cache_age")`
 #'
 #' @return `pkgsnippets::return_label("data")`
 #' @export
 ballot_dates_federal <- function(source = c("Neuchatel", "Zurich"),
                                  exclude_counterproposals = TRUE,
                                  use_cache = TRUE,
-                                 cache_lifespan = "1 day") {
+                                 max_cache_age = "1 day") {
   
   source <- rlang::arg_match(source)
   
@@ -2793,7 +2792,7 @@ ballot_dates_federal <- function(source = c("Neuchatel", "Zurich"),
   source,
   exclude_counterproposals,
   use_cache = use_cache,
-  cache_lifespan = cache_lifespan)
+  max_cache_age = max_cache_age)
 }
 
 #' Get cantonal ballot dates
@@ -2806,7 +2805,7 @@ ballot_dates_federal <- function(source = c("Neuchatel", "Zurich"),
 ballot_dates_cantonal <- function(cantons = c("Geneva", "Neuchatel", "Zurich"),
                                   exclude_counterproposals = TRUE,
                                   use_cache = TRUE,
-                                  cache_lifespan = "1 day") {
+                                  max_cache_age = "1 day") {
   
   cantons <- rlang::arg_match(cantons)
   
@@ -2867,7 +2866,7 @@ ballot_dates_cantonal <- function(cantons = c("Geneva", "Neuchatel", "Zurich"),
   cantons,
   exclude_counterproposals,
   use_cache = use_cache,
-  cache_lifespan = cache_lifespan)
+  max_cache_age = max_cache_age)
 }
 
 #' Get municipal ballot dates
@@ -2880,7 +2879,7 @@ ballot_dates_cantonal <- function(cantons = c("Geneva", "Neuchatel", "Zurich"),
 ballot_dates_municipal <- function(cantons = c("Geneva", "Neuchatel", "Zurich"),
                                    exclude_counterproposals = TRUE,
                                    use_cache = TRUE,
-                                   cache_lifespan = "1 day") {
+                                   max_cache_age = "1 day") {
   
   cantons <- rlang::arg_match(cantons)
   
@@ -2932,7 +2931,7 @@ ballot_dates_municipal <- function(cantons = c("Geneva", "Neuchatel", "Zurich"),
   cantons,
   exclude_counterproposals,
   use_cache = use_cache,
-  cache_lifespan = cache_lifespan)
+  max_cache_age = max_cache_age)
 }
 
 #' Retroactively merge municipalities that have merged

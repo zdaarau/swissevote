@@ -1,9 +1,9 @@
-#' @section Package options:
+#' @section Package configuration:
 #'
-#' The following package-specific R options are used to control the package's functionality:
+#' `r pkgsnip::md_snip("pkg_config", pkg = "swissevote")`
 #'
 #' ```{r, echo = FALSE}
-#' print_opts()
+#' pal::print_pkg_config("swissevote")
 #' ```
 #'
 #' @keywords internal

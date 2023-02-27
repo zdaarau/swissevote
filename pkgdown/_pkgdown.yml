@@ -29,3 +29,5 @@ reference:
   - ballot_dates_federal
   - ballot_dates_cantonal
   - ballot_dates_municipal
+- title: Miscellaneous
+- contents: pkg_config

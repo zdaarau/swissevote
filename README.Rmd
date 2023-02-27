@@ -13,8 +13,9 @@ output: pal::gitlab_document
 ### Raw data files
 
 The **cantonal raw data files** are *not* included in this package due to legal restrictions and/or concerns regarding voter privacy and thus **have to be
-provided by the user**. The path to the folder holding these files must be set in the [R option](https://rdrr.io/r/base/options.html)
-**`swissevote.path_raw_data`** and the files under this path are expected to be organized and named in the following way:
+provided by the user**. The path to the folder holding these files must be set via the [package configuration
+key](https://pal.rpkg.dev/reference/pkg_config_val.html) **`path_raw_data`** (e.g. by setting the R option `swissevote.path_raw_data`) and the files under this
+path are expected to be organized and named in the following way:
 
 ``` fs
 [swissevote.path_raw_data]/
@@ -35,8 +36,8 @@ State Chancellery). Raw data files from the other cantons must be named by the c
 ### Caching
 
 Time-consuming operations like reading in the raw datasets or scraping ballot dates from cantonal websites are cached to the local filesystem by default (using
-[pkgpins](https://pkgpins.rpkg.dev)). The maximum cache age for all affected functions can be set in the R option **`swissevote.global_max_cache_age`**[^1]
-(defaults to *30 days* if unset).
+[pkgpins](https://pkgpins.rpkg.dev)). The maximum cache age for all affected functions can be set via the package configuration key **`global_max_cache_age`**
+[^1] (defaults to *`r pal::pkg_config_val_default(key = "global_max_cache_age", pkg = "swissevote")`* if unset).
 
 ```{r}
 #| label: documentation

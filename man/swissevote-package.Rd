@@ -8,13 +8,13 @@
 \description{
 swissevote can parse cantonal voting register data, scrape authority websites for ballot data and provides other auxiliary functions around the Swiss e-voting trial data collected by the Centre for Democracy Studies Aarau (ZDA) at the University of Zurich, Switzerland.
 }
-\section{Package options}{
+\section{Package configuration}{
 
 
-The following package-specific R options are used to control the package's functionality:\tabular{lll}{
-   \strong{name} \tab \strong{description} \tab \strong{set automatically during package load} \cr
-   \code{swissevote.path_raw_data} \tab the path to the directory holding the cantonal raw data files (which are not part of this package due to legal restrictions and/or concerns regarding voter privacy); see the package's \href{https://gitlab.com/zdaarau/rpkgs/swissevote#raw-data-files}{README} for more details; only set automatically for user=salim \tab ✅ \cr
-   \code{swissevote.global_max_cache_age} \tab the default maximum cache age for all functions taking a \code{max_cache_age} argument; defaults to 30 days \tab ✅ \cr
+Some of swissevote's functionality is controlled via package-specific global configuration which can either be set via \R \link{options} or \href{https://en.wikipedia.org/wiki/Environment_variable}{environment variables} (the former take precedence). This configuration includes:\tabular{llll}{
+   \strong{Description} \tab \strong{R option} \tab \strong{Environment variable} \tab \strong{Default value} \cr
+   Maximal timespan to preserve the package's \href{https://pkgpins.rpkg.dev/}{pkgpins} cache. Cache entries older than this will be deleted upon package loading. \tab \code{swissevote.global_max_cache_age} \tab \code{SWISSEVOTE_GLOBAL_MAX_CACHE_AGE} \tab \code{"30 days"} \cr
+   the path to the directory holding the cantonal raw data files (which are not part of this package due to legal restrictions and/or concerns regarding voter privacy); see the section \emph{Raw data files} in the package's \href{https://swissevote.rpkg.dev/#raw-data-files}{README} for further details \tab \code{swissevote.path_raw_data} \tab \code{SWISSEVOTE_PATH_RAW_DATA} \tab  \cr
 }
 }
 

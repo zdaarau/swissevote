@@ -14,41 +14,23 @@
 
 .onLoad <- function(libname, pkgname) {
   
-  pkgpins::clear_cache(board = pkgpins::board(pkg = pkgname),
-                         max_age = getOption(paste0(pkgname, ".global_max_cache_age"),
-                                             default = "30 days"))
-  
-  # set local path to Google Drive folder dependent on username
-  opt_path_raw_data <- getOption(paste0(pkgname, ".path_raw_data"))
-  options(swissevote.path_raw_data = switch(EXPR = Sys.info()[["user"]],
-                                            "salim" = "~/Arbeit/ZDA/Google Drive/edc-projekt/iVoting_dataset/Datenquellen/",
-                                            opt_path_raw_data))
-  
-  
-  
-  if (is.null(opt_path_raw_data) || is.na(opt_path_raw_data)) {
-    
-    cli::cli_alert_warning(text = msg_raw_data_path_unset)
-    
-  } else {
-    
-    test_valid_path_raw_data <- checkmate::test_directory(opt_path_raw_data,
-                                                          access = "r")
-    
-    if (!isTRUE(test_valid_path_raw_data)) {
-      
-      cli::cli_alert_warning(paste0("The option {.field swissevote.path_raw_data} is set to {.val {opt_path_raw_data}}. ",
-                                    "This is not a valid path (with at least read access). Please correct this in order for this package to work properly."))
-    }
-  }
+  tryCatch(expr = pkgpins::clear_cache(board = pkgpins::board(pkg = pkgname),
+                                       max_age = pal::pkg_config_val(key = "global_max_cache_age",
+                                                                     pkg = pkgname)),
+           error = function(e) cli::cli_alert_warning(text = "Failed to clear pkgpins cache on load of {.pkg {pkgname}}. Error message: {e$message}"))
 }
 
 utils::globalVariables(names = c(".",
+                                 # tidyselect fns
+                                 "all_of",
+                                 "ends_with",
+                                 "matches",
+                                 "starts_with",
+                                 # other
                                  "aaData",
                                  "Abstimmungs_Datum",
                                  "Abstimmungs_Text",
                                  "agerevolu",
-                                 "all_of",
                                  "annee",
                                  "ballot_date",
                                  "ballot_votes_e_voting_electorate",
@@ -70,7 +52,6 @@ utils::globalVariables(names = c(".",
                                  "dnais",
                                  "dnaisaa",
                                  "election_level",
-                                 "ends_with",
                                  "e_votes",
                                  "e_voting_electorate",
                                  "federal_elected_power",
@@ -96,7 +77,8 @@ utils::globalVariables(names = c(".",
                                  "limited_to_cantons",
                                  "link",
                                  "matched_group_notes",
-                                 "matches",
+                                 "metadata_geneva_municipalities_districts",
+                                 "metadata_geneva_raw_datasets",
                                  "municipal_elected_power",
                                  "municipal_election_procedure",
                                  "municipality",
@@ -119,10 +101,8 @@ utils::globalVariables(names = c(".",
                                  "qualfed",
                                  "referendum_level",
                                  "sexe",
-                                 "starts_with",
                                  "subject",
                                  "subject_summary",
-                                 "starts_with",
                                  "Termin",
                                  "TerminalCode",
                                  "Titel der Vorlage",
@@ -168,32 +148,13 @@ e_voting_cantons <- tibble::tribble(
         "Zurich",          "ZH"
   )
 
-opts <- function(pretty_colnames = FALSE) {
-  
-  checkmate::assert_flag(pretty_colnames)
-  
-  opts <- tibble::tribble(
-    ~name, ~description, ~is_auto_init,
-    "swissevote.path_raw_data", paste0("the path to the directory holding the cantonal raw data files (which are not part of this package due to legal ",
-                                       "restrictions and/or concerns regarding voter privacy); see the package's ",
-                                       "[README](https://gitlab.com/zdaarau/rpkgs/swissevote#raw-data-files) for more details; only set automatically for ",
-                                       "user=salim"), TRUE,
-    "swissevote.global_max_cache_age", "the default maximum cache age for all functions taking a `max_cache_age` argument; defaults to 30 days", TRUE,
-  )
-  
-  if (pretty_colnames) {
-    opts %<>% dplyr::rename("set automatically during package load" = is_auto_init)
-  }
-  
-  opts
-}
-
 regex_counterproposal_fr <- "(?i)(co?n?tre-?projet(?!\\s(direct|relatif))|question\\ssubsidiaire)"
+
+msg_combined_code_all_na <- "{.var combined_code} couldn't be determined because all codes are {.val {NA}}."
 
 msg_raw_data_path_unset <- paste0("Please set the proper path to the cantonal raw data files in the option {.field swissevote.path_raw_data}. ",
                                   "To do so, run: {.code options(swissevote.path_raw_data = 'PATH/TO/Datenquellen/')}")
 
-msg_combined_code_all_na <- "{.var combined_code} couldn't be determined because all codes are {.val {NA}}."
 msg_xlsx_csv_zip_file_missing <- "File {.file {file_path}} neither found in XLSX nor in CSV or ZIP format."
 
 ballot_dates_federal_neuchatel <- function(exclude_counterproposals = FALSE) {
@@ -338,15 +299,6 @@ filetype_data_raw <- function(file_path,
     {file_type_precedence[.]}
 }
 
-lgl_to_unicode <- function(x) {
-  
-  checkmate::assert_logical(x)
-  
-  dplyr::if_else(x,
-                 "\u2705",
-                 "\u274C")
-}
-
 municipalities <- function(canton = c("Geneva", "Neuchatel", "Zurich")) {
   
   switch(EXPR = rlang::arg_match(canton),
@@ -401,30 +353,22 @@ municipalities <- function(canton = c("Geneva", "Neuchatel", "Zurich")) {
 path_raw_data <- function(...,
                           ext = "") {
   
-  path_raw_data <- getOption("swissevote.path_raw_data")
-  
+  path_raw_data <- pal::pkg_config_val(key = "path_raw_data",
+                                       pkg = this_pkg)
   if (is.null(path_raw_data)) {
     cli::cli_abort(message = msg_raw_data_path_unset)
   }
   
   if (!checkmate::test_directory(path_raw_data,
                                  access = "r")) {
-    cli::cli_abort(paste0("The path to the cantonal raw data files is either not valid or not readable. ", msg_raw_data_path_unset))
+    cli::cli_abort(paste0("The package configuration key {.field path_raw_data} is set to {.val {path_raw_data}}. This is not a valid path (with at least ",
+                          "read access). Please correct this in order for this package to work properly."))
   }
   
   path_raw_data %>%
-  fs::path(...,
-           ext = ext) %>%
+    fs::path(...,
+             ext = ext) %>%
     fs::path_abs()
-}
-
-print_opts <- function() {
-  
-  opts() %>%
-    dplyr::mutate(name = paste0("`", name, "`"),
-                  "set automatically during package load" = lgl_to_unicode(is_auto_init)) %>%
-    dplyr::select(-is_auto_init) %>%
-    pal::pipe_table()
 }
 
 #' Determine combination of three-code variables (`combined_election_procedure`)
@@ -2641,9 +2585,9 @@ read_raw_data_neuchatel <- function(ballot_date) {
 #' @export
 #'
 #' @examples
-#' convert_canton_names(c("ZH", "VD", "AG"))
-#' convert_canton_names(c("Zurich", "Vaud", "Argovia"))
-#' convert_canton_names(c("ZH", "Vaud", "Argovia"))
+#' swissevote::convert_canton_names(c("ZH", "VD", "AG"))
+#' swissevote::convert_canton_names(c("Zurich", "Vaud", "Argovia"))
+#' swissevote::convert_canton_names(c("ZH", "Vaud", "Argovia"))
 convert_canton_names <- function(cantons) {
   
   converted_names <- character()
@@ -2681,7 +2625,7 @@ ballot_dates_raw_data <- function(canton = c("Bern", "Geneva", "Neuchatel")) {
   canton_short <- rlang::arg_match(canton) %>% convert_canton_names()
   
   result <-
-    getOption("swissevote.path_raw_data") %>%
+    path_raw_data() %>%
     fs::path(canton_short) %>%
     fs::dir_ls(type = "file",
                regexp = switch(EXPR = canton_short,
@@ -2952,3 +2896,14 @@ merge_municipalities <- function(data) {
     purrr::map(merge_municipalities_by_canton) %>%
     purrr::list_rbind()
 }
+
+#' `r this_pkg` package configuration metadata
+#'
+#' A [tibble][tibble::tbl_df] with metadata of all possible `r this_pkg` package configuration options. See [pal::pkg_config_val()] for more information.
+#'
+#' @format `r pkgsnip::return_label("data_cols", cols = colnames(pkg_config))`
+#' @export
+#'
+#' @examples
+#' swissevote::pkg_config
+"pkg_config"

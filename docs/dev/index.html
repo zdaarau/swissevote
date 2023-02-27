@@ -72,7 +72,7 @@
 <div class="section level3">
 <h3 id="raw-data-files">Raw data files<a class="anchor" aria-label="anchor" href="#raw-data-files"></a>
 </h3>
-<p>The <strong>cantonal raw data files</strong> are <em>not</em> included in this package due to legal restrictions and/or concerns regarding voter privacy and thus <strong>have to be provided by the user</strong>. The path to the folder holding these files must be set in the <a href="https://rdrr.io/r/base/options.html" class="external-link">R option</a> <strong><code>swissevote.path_raw_data</code></strong> and the files under this path are expected to be organized and named in the following way:</p>
+<p>The <strong>cantonal raw data files</strong> are <em>not</em> included in this package due to legal restrictions and/or concerns regarding voter privacy and thus <strong>have to be provided by the user</strong>. The path to the folder holding these files must be set via the <a href="https://pal.rpkg.dev/reference/pkg_config_val.html">package configuration key</a> <strong><code>path_raw_data</code></strong> (e.g. by setting the R option <code>swissevote.path_raw_data</code>) and the files under this path are expected to be organized and named in the following way:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode fs"><code class="sourceCode fsharp"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="op">[</span>swissevote.path_raw_data<span class="op">]</span>/</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>├──BE/</span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>|  ├──BE_YYYY-MM-DD<span class="kw">.</span>EXT</span>
@@ -88,7 +88,7 @@
 <div class="section level3">
 <h3 id="caching">Caching<a class="anchor" aria-label="anchor" href="#caching"></a>
 </h3>
-<p>Time-consuming operations like reading in the raw datasets or scraping ballot dates from cantonal websites are cached to the local filesystem by default (using <a href="https://pkgpins.rpkg.dev" class="external-link">pkgpins</a>). The maximum cache age for all affected functions can be set in the R option <strong><code>swissevote.global_max_cache_age</code></strong><a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;Its value must be a valid &lt;a href="https://lubridate.tidyverse.org/reference/as.duration.html#details" class="external-link"&gt;lubridate duration&lt;/a&gt; which can be a natural-language string like &lt;code&gt;"2 days 1 minute 30 seconds"&lt;/code&gt; (or short &lt;code&gt;2d1min30s&lt;/code&gt;).&lt;/p&gt;'><sup>1</sup></a> (defaults to <em>30 days</em> if unset).</p>
+<p>Time-consuming operations like reading in the raw datasets or scraping ballot dates from cantonal websites are cached to the local filesystem by default (using <a href="https://pkgpins.rpkg.dev" class="external-link">pkgpins</a>). The maximum cache age for all affected functions can be set via the package configuration key <strong><code>global_max_cache_age</code></strong> <a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;Its value must be a valid &lt;a href="https://lubridate.tidyverse.org/reference/as.duration.html#details" class="external-link"&gt;lubridate duration&lt;/a&gt; which can be a natural-language string like &lt;code&gt;"2 days 1 minute 30 seconds"&lt;/code&gt; (or short &lt;code&gt;2d1min30s&lt;/code&gt;).&lt;/p&gt;'><sup>1</sup></a> (defaults to <em>30 days</em> if unset).</p>
 </div>
 </div>
 <div class="section level2">

@@ -16,7 +16,7 @@ A character vector.
 Convert between full canton names and their two-letter abbreviations
 }
 \examples{
-convert_canton_names(c("ZH", "VD", "AG"))
-convert_canton_names(c("Zurich", "Vaud", "Argovia"))
-convert_canton_names(c("ZH", "Vaud", "Argovia"))
+swissevote::convert_canton_names(c("ZH", "VD", "AG"))
+swissevote::convert_canton_names(c("Zurich", "Vaud", "Argovia"))
+swissevote::convert_canton_names(c("ZH", "Vaud", "Argovia"))
 }

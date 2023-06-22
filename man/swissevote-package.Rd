@@ -11,7 +11,7 @@ swissevote can parse cantonal voting register data, scrape authority websites fo
 \section{Package configuration}{
 
 
-Some of swissevote's functionality is controlled via package-specific global configuration which can either be set via \R \link{options} or \href{https://en.wikipedia.org/wiki/Environment_variable}{environment variables} (the former take precedence). This configuration includes:\tabular{llll}{
+Some of swissevote's functionality is controlled via package-specific global configuration which can either be set via \href{https://rdrr.io/r/base/options.html}{R options} or \href{https://en.wikipedia.org/wiki/Environment_variable}{environment variables} (the former take precedence). This configuration includes:\tabular{llll}{
    \strong{Description} \tab \strong{R option} \tab \strong{Environment variable} \tab \strong{Default value} \cr
    Maximal timespan to preserve the package's \href{https://pkgpins.rpkg.dev/}{pkgpins} cache. Cache entries older than this will be deleted upon package loading. \tab \code{swissevote.global_max_cache_age} \tab \code{SWISSEVOTE_GLOBAL_MAX_CACHE_AGE} \tab \code{"30 days"} \cr
    the path to the directory holding the cantonal raw data files (which are not part of this package due to legal restrictions and/or concerns regarding voter privacy); see the section \emph{Raw data files} in the package's \href{https://swissevote.rpkg.dev/#raw-data-files}{README} for further details \tab \code{swissevote.path_raw_data} \tab \code{SWISSEVOTE_PATH_RAW_DATA} \tab  \cr

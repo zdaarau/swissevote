@@ -41,9 +41,9 @@ Suggests:
     assertr (>= 2.7),
     pkgsnip (>= 0.0.9033)
 Remotes:
-    gitlab::salim_b/r/pkgs/pal,
-    gitlab::salim_b/r/pkgs/pkgpins,
-    gitlab::salim_b/r/pkgs/swissmuni
+    gitlab::rpkg.dev/pal,
+    gitlab::rpkg.dev/pkgpins,
+    gitlab::rpkg.dev/swissmuni
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

@@ -7,7 +7,7 @@
 determine_3_code_combo(...)
 }
 \arguments{
-\item{...}{Up to three individual codes as integers. \code{pkgsnip::roxy_label("dyn_dots_support")}}
+\item{...}{Up to three individual codes as integers. \code{pkgsnip::roxy_lbl("dyn_dots_support")}}
 }
 \value{
 An integer scalar.

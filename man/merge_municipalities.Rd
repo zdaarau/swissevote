@@ -10,7 +10,7 @@ merge_municipalities(data)
 \item{data}{The data in which to perform the retroactive municipality mergers.}
 }
 \value{
-\code{pkgsnip::return_label("data")}
+\code{pkgsnip::return_lbl("tibble")}
 }
 \description{
 This function builds upon \code{\link[swissmuni:mutations]{swissmuni::mutations()}} to find municipalities in \code{data} that have merged into another municipality and synthetically applies

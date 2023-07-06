@@ -373,7 +373,7 @@ path_raw_data <- function(...,
 
 #' Determine combination of three-code variables (`combined_election_procedure`)
 #'
-#' @param ... Up to three individual codes as integers. `pkgsnip::roxy_label("dyn_dots_support")`
+#' @param ... Up to three individual codes as integers. `pkgsnip::roxy_lbl("dyn_dots_support")`
 #'
 #' @return An integer scalar.
 #' @keywords internal
@@ -410,7 +410,7 @@ determine_3_code_combo <- function(...) {
 
 #' Determine combination of seven-code variables (like `combined_level`)
 #'
-#' @param ... Up to three individual codes as integers. `pkgsnip::roxy_label("dyn_dots_support")`
+#' @param ... Up to three individual codes as integers. `pkgsnip::roxy_lbl("dyn_dots_support")`
 #'
 #' @return An integer scalar.
 #' @keywords internal
@@ -2656,8 +2656,8 @@ ballot_dates_raw_data <- function(canton = c("Bern", "Geneva", "Neuchatel")) {
 #' @param specific_datasets If not `NULL`, only the specified filenames will be processed. A list with ballot dates as keys and character vectors of specific
 #'   filenames (without the filetype extension) as values. Setting `specific_datasets` is only sensible in case of `canton = "Geneva"` and thus ignored
 #'   otherwise.
-#' @param use_cache `r pkgsnip::param_label("use_cache")`
-#' @param max_cache_age `r pkgsnip::param_label("max_cache_age")`
+#' @param use_cache `r pkgsnip::param_lbl("use_cache")`
+#' @param max_cache_age `r pkgsnip::param_lbl("max_cache_age")`
 #'
 #' @return In case of `canton = "Geneva"`, a list with a tibble for each raw data file plus a metadata tibble. Otherwise a single tibble.
 #' @export
@@ -2692,8 +2692,8 @@ read_raw_data <- function(canton = c("Bern", "Geneva", "Neuchatel"),
 #'   referendum dates will be returned from `source = "Zurich"`, election dates can only be scraped from `source = "Neuchatel"`. On the other hand,
 #'   `source = "Zurich"` will return referendum dates back to the 19th century, while `source = "Neuchatel"` only goes back to the turn of the millennium.
 #' @param exclude_counterproposals Exclude indirect counterproposals and tie-breaker questions. A logical scalar.
-#' @param use_cache `r pkgsnip::param_label("use_cache")`
-#' @param max_cache_age `r pkgsnip::param_label("max_cache_age")`
+#' @param use_cache `r pkgsnip::param_lbl("use_cache")`
+#' @param max_cache_age `r pkgsnip::param_lbl("max_cache_age")`
 #'
 #' @return `pkgsnippets::return_label("data")`
 #' @export
@@ -2885,7 +2885,7 @@ ballot_dates_municipal <- function(cantons = c("Geneva", "Neuchatel", "Zurich"),
 #'
 #' @param data The data in which to perform the retroactive municipality mergers.
 #'
-#' @return `pkgsnip::return_label("data")`
+#' @return `pkgsnip::return_lbl("tibble")`
 #' @export
 merge_municipalities <- function(data) {
   
@@ -2901,7 +2901,7 @@ merge_municipalities <- function(data) {
 #'
 #' A [tibble][tibble::tbl_df] with metadata of all possible `r this_pkg` package configuration options. See [pal::pkg_config_val()] for more information.
 #'
-#' @format `r pkgsnip::return_label("data_cols", cols = colnames(pkg_config))`
+#' @format `r pkgsnip::return_lbl("tibble_cols", cols = colnames(pkg_config))`
 #' @export
 #'
 #' @examples

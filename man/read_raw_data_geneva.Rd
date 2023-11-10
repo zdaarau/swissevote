@@ -10,7 +10,7 @@ read_raw_data_geneva(
   check_municipalities = TRUE,
   remove_duplicated_votes = TRUE,
   remove_unknown_municipality_district_combos = FALSE,
-  remove_NA_locality_codes = FALSE,
+  remove_na_locality_codes = FALSE,
   skip_problematic_dates = FALSE
 )
 }
@@ -30,7 +30,7 @@ rare) case both variables are included and contradict each other, \code{votdup} 
 \item{remove_unknown_municipality_district_combos}{Ignore rows in raw data that are \emph{not} Swiss abroad but missing a \code{municipality} (usually with the
 undocumented district code \code{99}). A logical scalar.}
 
-\item{remove_NA_locality_codes}{Ignore rows in raw data that have no \code{municipality_code_2_digits} set (\code{NA}). A logical scalar.}
+\item{remove_na_locality_codes}{Ignore rows in raw data that have no \code{municipality_code_2_digits} set (\code{NA}). A logical scalar.}
 
 \item{skip_problematic_dates}{Skip \code{ballot_date}s for which unresolved parsing problems exist. A logical scalar.}
 }

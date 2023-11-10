@@ -252,7 +252,7 @@ ballot_dates_latest_neuchatel <- function() {
                       rvest::html_elements(css = "a") %>%
                       rvest::html_attr(name = "class") %>%
                       magrittr::equals("SubSectionTitle"))
-               & !is.na(level_i)) {
+               && !is.na(level_i)) {
       
       text_i <-
         raw_extract[[i]] %>%
@@ -268,7 +268,7 @@ ballot_dates_latest_neuchatel <- function() {
                                         municipality = ifelse(level == "municipal",
                                                               text_i[1L] %>%
                                                                 stringr::str_extract(pattern = "^.+?(?= - )") %>%
-                                                                stringr::str_replace_all(pattern = "Les Geneveys s/Coffrane",
+                                                                stringr::str_replace_all(pattern = stringr::fixed("Les Geneveys s/Coffrane"),
                                                                                          replacement = "Les Geneveys-sur-Coffrane"),
                                                               NA_character_),
                                         is_election = stringr::str_detect(string = text_i[1L],
@@ -302,51 +302,51 @@ filetype_data_raw <- function(file_path,
 municipalities <- function(canton = c("Geneva", "Neuchatel", "Zurich")) {
   
   switch(EXPR = rlang::arg_match(canton),
-         "Geneva" = c("Ani\u00e8res",
-                      "Cologny",
-                      "Carouge",
-                      "Meyrin",
-                      "Vandoeuvres",
-                      "Collonge-Bellerive",
-                      "Onex",
-                      "Versoix",
-                      "Bernex",
-                      "Ch\u00eane-Bourg",
-                      "Grand-Saconnex",
-                      "Lancy",
-                      "Th\u00f4nex",
-                      "Vernier",
-                      "Perly-Certoux",
-                      "Plan-les-Ouates",
-                      "Ch\u00eane-Bougeries",
-                      "Avusy",
-                      "Aire-la-Ville",
-                      "Troinex",
-                      "Avully",
-                      "Bardonnex",
-                      "Bellevue",
-                      "Cartigny",
-                      "C\u00e9ligny",
-                      "Chancy",
-                      "Choulex",
-                      "Collex-Bossy",
-                      "Confignon",
-                      "Corsier",
-                      "Dardagny",
-                      "Gen\u00e8ve",
-                      "Genthod",
-                      "Gy",
-                      "Hermance",
-                      "Jussy",
-                      "Laconnex",
-                      "Meinier",
-                      "Pregny-Chamb\u00e9sy",
-                      "Presinge",
-                      "Puplinge",
-                      "Russin",
-                      "Satigny",
-                      "Soral",
-                      "Veyrier"),
+         Geneva = c("Ani\u00e8res",
+                    "Cologny",
+                    "Carouge",
+                    "Meyrin",
+                    "Vandoeuvres",
+                    "Collonge-Bellerive",
+                    "Onex",
+                    "Versoix",
+                    "Bernex",
+                    "Ch\u00eane-Bourg",
+                    "Grand-Saconnex",
+                    "Lancy",
+                    "Th\u00f4nex",
+                    "Vernier",
+                    "Perly-Certoux",
+                    "Plan-les-Ouates",
+                    "Ch\u00eane-Bougeries",
+                    "Avusy",
+                    "Aire-la-Ville",
+                    "Troinex",
+                    "Avully",
+                    "Bardonnex",
+                    "Bellevue",
+                    "Cartigny",
+                    "C\u00e9ligny",
+                    "Chancy",
+                    "Choulex",
+                    "Collex-Bossy",
+                    "Confignon",
+                    "Corsier",
+                    "Dardagny",
+                    "Gen\u00e8ve",
+                    "Genthod",
+                    "Gy",
+                    "Hermance",
+                    "Jussy",
+                    "Laconnex",
+                    "Meinier",
+                    "Pregny-Chamb\u00e9sy",
+                    "Presinge",
+                    "Puplinge",
+                    "Russin",
+                    "Satigny",
+                    "Soral",
+                    "Veyrier"),
          cli::cli_abort("Not implemented yet."))
 }
 
@@ -401,8 +401,10 @@ determine_3_code_combo <- function(...) {
       
       combined_code <- all_codes[1L]
       
+    } else {
       # else combined code must be 3
-    } else combined_code <- 3L
+      combined_code <- 3L
+    }
   }
   
   combined_code
@@ -537,21 +539,21 @@ combine_group <- function(...) {
 get_group_name <- function(group) {
   
   switch(EXPR = as.character(group),
-         "1" = "Swiss citizens living in Switzerland" ,
-         "2" = "Swiss citizens living abroad" ,
-         "3" = "foreigners" ,
-         "4" = "Swiss citizens living in Switzerland & Swiss citizens living abroad" ,
-         "5" = "Swiss citizens living in Switzerland & foreigners" ,
-         "6" = "Swiss citizens living in Switzerland & Swiss citizens living abroad & foreigners",
+         `1` = "Swiss citizens living in Switzerland",
+         `2` = "Swiss citizens living abroad",
+         `3` = "foreigners",
+         `4` = "Swiss citizens living in Switzerland & Swiss citizens living abroad",
+         `5` = "Swiss citizens living in Switzerland & foreigners",
+         `6` = "Swiss citizens living in Switzerland & Swiss citizens living abroad & foreigners",
          NA_character_)
 }
 
 get_type_name <- function(type) {
   
   switch(EXPR = as.character(type),
-         "1" = "referendum" ,
-         "2" = "election" ,
-         "3" = "both (referendum & election)",
+         `1` = "referendum",
+         `2` = "election",
+         `3` = "both (referendum & election)",
          NA_character_)
 }
 
@@ -572,10 +574,10 @@ get_level_name <- function(level) {
 get_federal_elected_power_name <- function(federal_elected_power) {
   
   switch(EXPR = as.character(federal_elected_power),
-         "0" = "none",
-         "1" = "legislature (National Council)" ,
-         "2" = "legislature (Council of States)" ,
-         "3" = "legislature (National Council & Council of States)",
+         `0` = "none",
+         `1` = "legislature (National Council)",
+         `2` = "legislature (Council of States)",
+         `3` = "legislature (National Council & Council of States)",
          NA_character_)
 }
 
@@ -602,10 +604,10 @@ get_elected_power_name <- function(elected_power) {
 get_election_procedure_name <- function(election_procedure) {
   
   switch(EXPR = as.character(election_procedure),
-         "0" = "none",
-         "1" = "proportional voting" ,
-         "2" = "majority voting" ,
-         "3" = "proportional voting & majority voting",
+         `0` = "none",
+         `1` = "proportional voting",
+         `2` = "majority voting",
+         `3` = "proportional voting & majority voting",
          NA_character_)
 }
 
@@ -686,7 +688,7 @@ get_neuchatel_municipal_ballot_dates <- function(exclude_counterproposals = FALS
                   municipality =
                     subject %>%
                     stringr::str_extract(pattern = "^.+?(?= - )") %>%
-                    stringr::str_replace_all(pattern = "Les Geneveys s/Coffrane",
+                    stringr::str_replace_all(pattern = stringr::fixed("Les Geneveys s/Coffrane"),
                                              replacement = "Les Geneveys-sur-Coffrane"),
                   is_election =
                     subject %>%
@@ -734,17 +736,17 @@ get_neuchatel_municipal_ballot_dates <- function(exclude_counterproposals = FALS
   ballot_dates
 }
 
-get_geneva_referendum_dates <- function(years = 1996:lubridate::year(lubridate::today()),
-                                        exclude_counterproposals = FALSE) {
+get_geneva_rfrnd_dates <- function(years = 1996:lubridate::year(lubridate::today()),
+                                   exclude_counterproposals = FALSE) {
   
-  referendum_dates <- get_geneva_referendum_dates_skeleton()
+  rfrnd_dates <- get_geneva_rfrnd_dates_skeleton()
   
   for (year in years) {
     
-    referendum_dates %<>% dplyr::bind_rows(get_geneva_referendum_date(year = year))
+    rfrnd_dates %<>% dplyr::bind_rows(get_geneva_rfrnd_date(year = year))
   }
   
-  referendum_dates %<>%
+  rfrnd_dates %<>%
     # ensure correct spelling of "Gen\u00e8ve"
     dplyr::mutate(municipality = dplyr::if_else(municipality == "Geneve",
                                                 "Gen\u00e8ve",
@@ -770,7 +772,7 @@ get_geneva_referendum_dates <- function(years = 1996:lubridate::year(lubridate::
     
     ## get affected combos
     affected_date_proposal_combos <-
-      referendum_dates %>%
+      rfrnd_dates %>%
       dplyr::mutate(proposal_nrs =
                       stringr::str_extract_all(string = subject,
                                                pattern = paste0(regex_proposal_nr, "\\d+")) %>%
@@ -786,12 +788,12 @@ get_geneva_referendum_dates <- function(years = 1996:lubridate::year(lubridate::
       tidyr::unnest()
     
     ## get affected entries
-    to_exclude <- referendum_dates[0L, ]
+    to_exclude <- rfrnd_dates[0L, ]
     
     for (i in seq_len(nrow(affected_date_proposal_combos))) {
       
       to_exclude <-
-        referendum_dates %>%
+        rfrnd_dates %>%
         dplyr::filter(ballot_date == affected_date_proposal_combos$ballot_date[i]
                       & level == affected_date_proposal_combos$level[i]
                       & (municipality == affected_date_proposal_combos$municipality[i]
@@ -808,35 +810,35 @@ get_geneva_referendum_dates <- function(years = 1996:lubridate::year(lubridate::
     }
     
     ## exclude affected entries
-    referendum_dates %<>%
+    rfrnd_dates %<>%
       dplyr::setdiff(y = to_exclude) %>%
       # exclude some special cases (not having a proposal number)
       dplyr::filter(!(municipality == "Versoix" & ballot_date == "2009-05-17" & stringr::str_detect(string = subject,
                                                                                                     pattern = "(?i)(contreprojet|question\\ssubsidiaire)")))
   }
   
-  referendum_dates
+  rfrnd_dates
 }
 
-get_geneva_referendum_date <- function(year) {
+get_geneva_rfrnd_date <- function(year) {
   
   if (year < 2007L) {
     
-    referendum_dates <- scrape_geneva_referendum_dates_before_2007(year = year)
+    rfrnd_dates <- scrape_geneva_rfrnd_dates_before_2007(year = year)
     
   } else if (year < 2015L) {
     
-    referendum_dates <- scrape_geneva_referendum_dates_between_2007_2014(year = year)
+    rfrnd_dates <- scrape_geneva_rfrnd_dates_2007_to_2014(year = year)
     
   } else {
     
-    referendum_dates <- scrape_geneva_referendum_dates_after_2014(year = year)
+    rfrnd_dates <- scrape_geneva_rfrnd_dates_after_2014(year = year)
   }
   
-  referendum_dates
+  rfrnd_dates
 }
 
-get_geneva_referendum_dates_skeleton <- function() {
+get_geneva_rfrnd_dates_skeleton <- function() {
   
   tibble::tibble(ballot_date = lubridate::as_date(integer()),
                  level = character(),
@@ -844,7 +846,7 @@ get_geneva_referendum_dates_skeleton <- function() {
                  subject = character())
 }
 
-scrape_geneva_referendum_dates_before_2007 <- function(year) {
+scrape_geneva_rfrnd_dates_before_2007 <- function(year) {
   
   raw_extract <-
     xml2::read_html(x = paste0("https://www.ge.ch/votations/", year, ".asp"),
@@ -855,10 +857,10 @@ scrape_geneva_referendum_dates_before_2007 <- function(year) {
   level <-
     raw_extract %>%
     rvest::html_attr(name = "class") %>%
-    stringr::str_replace(pattern = "communal",
+    stringr::str_replace(pattern = stringr::fixed("communal"),
                          replacement = "municipal")
   
-  referendum_dates <- get_geneva_referendum_dates_skeleton()
+  rfrnd_dates <- get_geneva_rfrnd_dates_skeleton()
   
   for (i in seq_along(raw_extract)) {
     
@@ -882,7 +884,7 @@ scrape_geneva_referendum_dates_before_2007 <- function(year) {
     
     if (length(raw_subextract)) {
       
-      referendum_dates %<>%
+      rfrnd_dates %<>%
         tibble::add_row(ballot_date =
                           raw_subextract %>%
                           rvest::html_attr(name = "href") %>%
@@ -904,7 +906,7 @@ scrape_geneva_referendum_dates_before_2007 <- function(year) {
     }
   }
   
-  referendum_dates %>%
+  rfrnd_dates %>%
     # remove spurious entries
     dplyr::filter(!is.na(ballot_date) & !is.na(level)) %>%
     # special case 2005 (site structure differs): set correct `municipality`
@@ -913,7 +915,7 @@ scrape_geneva_referendum_dates_before_2007 <- function(year) {
                                                 municipality))
 }
 
-scrape_geneva_referendum_dates_between_2007_2014 <- function(year) {
+scrape_geneva_rfrnd_dates_2007_to_2014 <- function(year) {
   
   raw_extract <-
     xml2::read_html(x = paste0("https://www.ge.ch/votations/", year, ".asp"),
@@ -933,14 +935,14 @@ scrape_geneva_referendum_dates_between_2007_2014 <- function(year) {
   level <-
     raw_extract %>%
     rvest::html_attr(name = "class") %>%
-    stringr::str_replace(pattern = "communal",
+    stringr::str_replace(pattern = stringr::fixed("communal"),
                          replacement = "municipal")
   
   vote_locations <- level
   vote_locations[!is.na(vote_locations)] <- vote_locations_temp
   rm(vote_locations_temp)
   
-  referendum_dates <- get_geneva_referendum_dates_skeleton()
+  rfrnd_dates <- get_geneva_rfrnd_dates_skeleton()
   ballot_date <- lubridate::as_date(NA)
   
   for (i in seq_along(raw_extract)) {
@@ -974,24 +976,24 @@ scrape_geneva_referendum_dates_between_2007_2014 <- function(year) {
       
       if (length(raw_subextract)) {
         
-        referendum_dates %<>% tibble::add_row(ballot_date = !!ballot_date,
-                                              level = !!level[i],
-                                              municipality = vote_locations[i],
-                                              subject =
-                                                raw_subextract %>%
-                                                rvest::html_text() %>%
-                                                stringr::str_squish())
+        rfrnd_dates %<>% tibble::add_row(ballot_date = !!ballot_date,
+                                         level = !!level[i],
+                                         municipality = vote_locations[i],
+                                         subject =
+                                           raw_subextract %>%
+                                           rvest::html_text() %>%
+                                           stringr::str_squish())
       }
     }
   }
   
   # set `municipality` to NA again if `level` isn't municipal
-  referendum_dates %>% dplyr::mutate(municipality = dplyr::if_else(level == "municipal",
-                                                                   municipality,
-                                                                   NA_character_))
+  rfrnd_dates %>% dplyr::mutate(municipality = dplyr::if_else(level == "municipal",
+                                                              municipality,
+                                                              NA_character_))
 }
 
-scrape_geneva_referendum_dates_after_2014 <- function(year) {
+scrape_geneva_rfrnd_dates_after_2014 <- function(year) {
   
   raw_extract <-
     xml2::read_html(x = "https://www.ge.ch/votations/welcome.asp",
@@ -1011,7 +1013,7 @@ scrape_geneva_referendum_dates_after_2014 <- function(year) {
     magrittr::extract(is_relevant_year) %>%
     rvest::html_elements(css = "li")
   
-  referendum_dates <- get_geneva_referendum_dates_skeleton()
+  rfrnd_dates <- get_geneva_rfrnd_dates_skeleton()
   
   ## process ballot-date-specific subpages
   for (i in seq_along(raw_extract)) {
@@ -1034,21 +1036,21 @@ scrape_geneva_referendum_dates_after_2014 <- function(year) {
       # subpage format has changed from 2018-09-23 onwards
       if (ballot_date < "2018-09-23") {
         
-        referendum_dates %<>% dplyr::bind_rows(scrape_geneva_referendum_date_between_2014_mid_2018(ballot_date = ballot_date,
-                                                                                                   url = subpage_url))
+        rfrnd_dates %<>% dplyr::bind_rows(scrape_geneva_rfrnd_date_2014_mid_2018(ballot_date = ballot_date,
+                                                                                 url = subpage_url))
       } else {
         
-        referendum_dates %<>% dplyr::bind_rows(scrape_geneva_referendum_date_after_mid_2018(ballot_date = ballot_date,
-                                                                                            url = subpage_url))
+        rfrnd_dates %<>% dplyr::bind_rows(scrape_geneva_rfrnd_date_after_mid_2018(ballot_date = ballot_date,
+                                                                                  url = subpage_url))
       }
     }
   }
   
-  referendum_dates
+  rfrnd_dates
 }
 
-scrape_geneva_referendum_date_between_2014_mid_2018 <- function(ballot_date,
-                                                                url) {
+scrape_geneva_rfrnd_date_2014_mid_2018 <- function(ballot_date,
+                                                   url) {
   raw_extract <-
     xml2::read_html(x = url,
                     # subpage format has changed from 2018-09-23 onwards
@@ -1067,10 +1069,10 @@ scrape_geneva_referendum_date_between_2014_mid_2018 <- function(ballot_date,
   level <-
     raw_extract %>%
     rvest::html_attr(name = "class") %>%
-    stringr::str_replace(pattern = "communal",
+    stringr::str_replace(pattern = stringr::fixed("communal"),
                          replacement = "municipal")
   
-  referendum_dates <- get_geneva_referendum_dates_skeleton()
+  rfrnd_dates <- get_geneva_rfrnd_dates_skeleton()
   
   for (i in seq_along(raw_extract)) {
     
@@ -1093,24 +1095,24 @@ scrape_geneva_referendum_date_between_2014_mid_2018 <- function(ballot_date,
       
       if (length(raw_subextract)) {
         
-        referendum_dates %<>% tibble::add_row(ballot_date = !!ballot_date,
-                                              level = !!level[i],
-                                              municipality = ifelse(level == "municipal",
-                                                                    vote_locations[i],
-                                                                    NA_character_),
-                                              subject =
-                                                raw_subextract %>%
-                                                rvest::html_text() %>%
-                                                stringr::str_squish())
+        rfrnd_dates %<>% tibble::add_row(ballot_date = !!ballot_date,
+                                         level = !!level[i],
+                                         municipality = ifelse(level == "municipal",
+                                                               vote_locations[i],
+                                                               NA_character_),
+                                         subject =
+                                           raw_subextract %>%
+                                           rvest::html_text() %>%
+                                           stringr::str_squish())
       }
     }
   }
   
-  referendum_dates
+  rfrnd_dates
 }
 
-scrape_geneva_referendum_date_after_mid_2018 <- function(ballot_date,
-                                                         url) {
+scrape_geneva_rfrnd_date_after_mid_2018 <- function(ballot_date,
+                                                    url) {
   raw_extract <- xml2::read_html(x = url,
                                  # subpage format has changed from 2018-09-23 onwards
                                  encoding = "UTF-8")
@@ -1122,9 +1124,7 @@ scrape_geneva_referendum_date_after_mid_2018 <- function(ballot_date,
     rvest::html_elements(css = "*") %>%
     rvest::html_attr("id") %>%
     unique() %>%
-    magrittr::extract(stringr::str_detect(string = .,
-                                          pattern = "^objet_")
-                      & !is.na(.)) %>%
+    magrittr::extract(startsWith("objet_") & !is.na(.)) %>%
     paste0("#", .)
   
   vote_locations <-
@@ -1158,17 +1158,17 @@ scrape_geneva_referendum_date_after_mid_2018 <- function(ballot_date,
             stringr::str_squish(),
           sep = " \u2013 ")
   
-  referendum_dates <- tibble::tibble(ballot_date = ballot_date,
-                                     level =
-                                       objet_selectors %>%
-                                       stringr::str_extract(pattern = "(?<=^#objet_).+?(?=_)") %>%
-                                       stringr::str_replace(pattern = "FED", replacement = "federal") %>%
-                                       stringr::str_replace(pattern = "CAN", replacement = "cantonal") %>%
-                                       stringr::str_replace(pattern = "COM", replacement = "municipal"),
-                                     municipality = vote_locations,
-                                     subject = subjects)
+  rfrnd_dates <- tibble::tibble(ballot_date = ballot_date,
+                                level =
+                                  objet_selectors %>%
+                                  stringr::str_extract(pattern = "(?<=^#objet_).+?(?=_)") %>%
+                                  stringr::str_replace(pattern = stringr::fixed("FED"), replacement = "federal") %>%
+                                  stringr::str_replace(pattern = stringr::fixed("CAN"), replacement = "cantonal") %>%
+                                  stringr::str_replace(pattern = stringr::fixed("COM"), replacement = "municipal"),
+                                municipality = vote_locations,
+                                subject = subjects)
   
-  referendum_dates
+  rfrnd_dates
 }
 
 get_geneva_election_dates <- function() {
@@ -1416,9 +1416,9 @@ get_geneva_municipal_election_dates <- function() {
     dplyr::arrange(ballot_date, municipality)
 }
 
-get_zurich_referendum_dates <- function(exclude_counterproposals = FALSE) {
+get_zurich_rfrnd_dates <- function(exclude_counterproposals = FALSE) {
   
-  referendum_dates <-
+  rfrnd_dates <-
     jsonlite::fromJSON(txt = "https://www.web.statistik.zh.ch/cms_abstimmungsarchiv/includes/ajax_get_vorlagen.php") %$%
     aaData %>%
     magrittr::set_colnames(paste0("V", seq_len(ncol(.)))) %>%
@@ -1454,11 +1454,11 @@ get_zurich_referendum_dates <- function(exclude_counterproposals = FALSE) {
   # exclude indirect counterproposals and tie-breaker questions
   if (exclude_counterproposals) {
     
-    referendum_dates %<>% dplyr::filter(!stringr::str_detect(string = type,
-                                                             pattern = "(^|:\\s+)(Gegenvorschlag|Stichfrage)"))
+    rfrnd_dates %<>% dplyr::filter(!stringr::str_detect(string = type,
+                                                        pattern = "(^|:\\s+)(Gegenvorschlag|Stichfrage)"))
   }
   
-  referendum_dates
+  rfrnd_dates
 }
 
 get_zurich_municipal_ballot_dates <- function(municipalities = NULL,
@@ -1520,12 +1520,12 @@ get_zurich_municipal_ballot_dates <- function(municipalities = NULL,
       }
       
       data_current <- switch(EXPR = municipality,
-                             "Boppelsen" = get_zurich_municipal_dates_boppelsen(),
+                             Boppelsen = get_zurich_municipal_dates_boppelsen(),
                              "M\u00e4nnedorf" = get_zurich_municipal_dates_maennedorf(),
-                             "Mettmenstetten" = get_zurich_municipal_dates_mettmenstetten(),
-                             "Schlieren" = get_zurich_municipal_dates_schlieren(),
-                             "Thalwil" = get_zurich_municipal_dates_thalwil(),
-                             "Winterthur" = get_zurich_municipal_dates_winterthur(),
+                             Mettmenstetten = get_zurich_municipal_dates_mettmenstetten(),
+                             Schlieren = get_zurich_municipal_dates_schlieren(),
+                             Thalwil = get_zurich_municipal_dates_thalwil(),
+                             Winterthur = get_zurich_municipal_dates_winterthur(),
                              "Z\u00fcrich" = get_zurich_municipal_dates_zuerich(exclude_counterproposals = exclude_counterproposals))
       
       data %<>% dplyr::full_join(y = data_current,
@@ -1647,7 +1647,7 @@ get_zurich_municipal_dates_maur <- function() {
            httr::content_type(type = "application/x-www-form-urlencoded"),
            body = list(newsSearchParams.query = "",
                        # `newsSearchParams.category = 8` stands for "Wahlen / Abstimmungen"
-                       newsSearchParams.category = 8,
+                       newsSearchParams.category = 8L,
                        newsSearchParams.dateFrom = "",
                        newsSearchParams.dateTo = ""),
            encode = "form") %>%
@@ -1745,7 +1745,7 @@ get_zurich_municipal_dates_winterthur <- function() {
 
 get_zurich_municipal_dates_zuerich <- function(exclude_counterproposals = FALSE) {
   
-  referendum_dates <-
+  rfrnd_dates <-
     readr::read_csv(file = paste0("https://data.stadt-zuerich.ch/dataset/politik_abstimmungen_seit_1933/resource/3b5a8ed9-0765-4d59-95a1-e87aa98350e3/",
                                   "download/abstimmungen_seit1933.csv"),
                     locale = readr::locale(encoding = "UTF-8",
@@ -1771,11 +1771,11 @@ get_zurich_municipal_dates_zuerich <- function(exclude_counterproposals = FALSE)
   
   if (exclude_counterproposals) {
     
-    referendum_dates %<>% dplyr::filter(!stringr::str_detect(string = subject,
-                                                             pattern = "(?i)(^[bc][\\s\\.:)]|stichfrage)"))
+    rfrnd_dates %<>% dplyr::filter(!stringr::str_detect(string = subject,
+                                                        pattern = "(?i)(^[bc][\\s\\.:)]|stichfrage)"))
   }
   
-  referendum_dates
+  rfrnd_dates
 }
 
 get_zurich_municipal_dates_generic_iweb_1 <- function(municipality,
@@ -1844,15 +1844,15 @@ get_zurich_municipal_dates_generic_iweb_2 <- function(municipality,
           cells <- rvest::html_elements(x = .x,
                                         css = "td")
           tibble::tibble(ballot_date =
-                           cells[[1]] %>%
+                           cells[[1L]] %>%
                            rvest::html_attr("data-order") %>%
                            lubridate::as_date(),
                          subject =
-                           cells[[2]] %>%
+                           cells[[2L]] %>%
                            rvest::html_element(css = "a") %>%
                            rvest::html_text(),
                          url =
-                           cells[[2]] %>%
+                           cells[[2L]] %>%
                            rvest::html_element(css = "a") %>%
                            rvest::html_attr("href") %>%
                            paste0(base_url, .))
@@ -1861,8 +1861,8 @@ get_zurich_municipal_dates_generic_iweb_2 <- function(municipality,
     })
   
   # merge referendum and election tables
-  dplyr::bind_rows(data[[1]] %>% dplyr::mutate(is_election = FALSE),
-                   data[[2]] %>% dplyr::mutate(is_election = TRUE)) %>%
+  dplyr::bind_rows(data[[1L]] %>% dplyr::mutate(is_election = FALSE),
+                   data[[2L]] %>% dplyr::mutate(is_election = TRUE)) %>%
     dplyr::mutate(municipality = !!municipality) %>%
     dplyr::select(ballot_date, municipality, is_election, subject, url) %>%
     dplyr::arrange(ballot_date, is_election)
@@ -1950,7 +1950,6 @@ merge_municipalities_helper <- function(rows,
                                         municipality_code_new,
                                         municipality_new,
                                         target_colnames) {
-  
   rows %>%
     dplyr::summarise(comments = paste0("Retroactively (i.e. synthetically) merged from the municipalities ", pal::prose_ls(municipality), "; ",
                                        paste0(unique(comments),
@@ -2097,7 +2096,7 @@ read_raw_data_bern <- function(ballot_date) {
 #'   rare) case both variables are included and contradict each other, `votdup` is given preference.
 #' @param remove_unknown_municipality_district_combos Ignore rows in raw data that are _not_ Swiss abroad but missing a `municipality` (usually with the
 #'   undocumented district code `99`). A logical scalar.
-#' @param remove_NA_locality_codes Ignore rows in raw data that have no `municipality_code_2_digits` set (`NA`). A logical scalar.
+#' @param remove_na_locality_codes Ignore rows in raw data that have no `municipality_code_2_digits` set (`NA`). A logical scalar.
 #' @param skip_problematic_dates Skip `ballot_date`s for which unresolved parsing problems exist. A logical scalar.
 #'
 #' @return A list with a tibble of each raw data file plus metadata tibble.
@@ -2107,7 +2106,7 @@ read_raw_data_geneva <- function(ballot_date,
                                  check_municipalities = TRUE,
                                  remove_duplicated_votes = TRUE,
                                  remove_unknown_municipality_district_combos = FALSE,
-                                 remove_NA_locality_codes = FALSE,
+                                 remove_na_locality_codes = FALSE,
                                  skip_problematic_dates = FALSE) {
   
   # get filename(s) of Geneva dataset(s)
@@ -2124,7 +2123,7 @@ read_raw_data_geneva <- function(ballot_date,
   }
   
   # warn if some files are unknown
-  if (any(is.na(filenames))) {
+  if (anyNA(filenames)) {
     
     na_notes <-
       metadata_geneva_raw_datasets %>%
@@ -2145,7 +2144,7 @@ read_raw_data_geneva <- function(ballot_date,
   
   # take `specific_datasets` into account
   if (!is.null(specific_datasets[[ballot_date]])
-      & length(filenames)) {
+      && length(filenames)) {
     
     filenames %<>% magrittr::extract(. %in% specific_datasets[[ballot_date]])
   }
@@ -2165,7 +2164,7 @@ read_raw_data_geneva <- function(ballot_date,
   # TODO: get at the bottom of this!
   
   ## skip them all
-  if (skip_problematic_dates &
+  if (skip_problematic_dates &&
       ballot_date %in% problematic_dates) {
     
     cli::cli_alert_warning("Skipped processing data from {.val {ballot_date}} due to unresolved issues.")
@@ -2186,7 +2185,7 @@ read_raw_data_geneva <- function(ballot_date,
       data_raw <- read_raw_dataset_geneva(filename = filename,
                                           check_municipalities = check_municipalities,
                                           remove_unknown_municipality_district_combos = remove_unknown_municipality_district_combos,
-                                          remove_NA_locality_codes = remove_NA_locality_codes,
+                                          remove_na_locality_codes = remove_na_locality_codes,
                                           remove_duplicated_votes = remove_duplicated_votes)
       
       # skip empty dataframes (no raw data found)
@@ -2211,7 +2210,7 @@ read_raw_data_geneva <- function(ballot_date,
 read_raw_dataset_geneva <- function(filename,
                                     check_municipalities,
                                     remove_unknown_municipality_district_combos,
-                                    remove_NA_locality_codes,
+                                    remove_na_locality_codes,
                                     remove_duplicated_votes,
                                     metadata_municipalities_districts = metadata_geneva_municipalities_districts) {
   
@@ -2340,18 +2339,18 @@ read_raw_dataset_geneva <- function(filename,
   # add binary variable `is_swiss_living_abroad`
   ## check if there are entries with no `municipality_code_2_digits` (`NA`)
   ### get number of affected entries
-  nr_of_NA_municipality_code_2_digits <- length(which(is.na(data_raw$municipality_code_2_digits)))
+  nr_of_na_municipality_code_2_digits <- length(which(is.na(data_raw$municipality_code_2_digits)))
   
-  if (nr_of_NA_municipality_code_2_digits > 0L) {
+  if (nr_of_na_municipality_code_2_digits > 0L) {
     
     ### print an informative warning
-    cli::cli_alert_warning(paste0("{.val {nr_of_NA_municipality_code_2_digits}} of a total of {nrow(data_raw)} entries in the raw Geneva data file {.file ",
+    cli::cli_alert_warning(paste0("{.val {nr_of_na_municipality_code_2_digits}} of a total of {nrow(data_raw)} entries in the raw Geneva data file {.file ",
                                   "{filename}} have no {.var municipality_code_2_digits} set ({.val {NA}}).",
-                                  ifelse(remove_NA_locality_codes,
+                                  ifelse(remove_na_locality_codes,
                                          " They have been removed.",
                                          "")))
     
-    if (remove_NA_locality_codes) {
+    if (remove_na_locality_codes) {
       
       ### remove affected entries
       data_raw %<>% dplyr::filter(!is.na(municipality_code_2_digits))
@@ -2364,19 +2363,19 @@ read_raw_dataset_geneva <- function(filename,
   # add binary variable `is_foreigner`
   ## check if there are entries with no `country_canton_code` (`NA`)
   ### get number of affected entries
-  nr_of_NA_country_canton_code <- length(which(is.na(data_raw$country_canton_code)))
+  nr_of_na_country_canton_code <- length(which(is.na(data_raw$country_canton_code)))
   
-  if (nr_of_NA_country_canton_code > 0L) {
+  if (nr_of_na_country_canton_code > 0L) {
     
     ### print an informative warning
-    cli::cli_alert_warning(paste0("{.val {nr_of_NA_country_canton_code}} of a total of {nrow(data_raw)} entries in the raw Geneva data file {.file ",
+    cli::cli_alert_warning(paste0("{.val {nr_of_na_country_canton_code}} of a total of {nrow(data_raw)} entries in the raw Geneva data file {.file ",
                                   "{filename}} have no {.var country_canton_code} set ({.val {NA}}).",
-                                  ifelse(remove_NA_locality_codes,
+                                  ifelse(remove_na_locality_codes,
                                          " They have been removed.",
                                          "")))
     
     ### remove affected entries
-    if (remove_NA_locality_codes) {
+    if (remove_na_locality_codes) {
       
       data_raw %<>% dplyr::filter(!is.na(country_canton_code))
     }
@@ -2559,7 +2558,7 @@ read_raw_data_neuchatel <- function(ballot_date) {
                                             .default = TRUE)
   
   ## check for missing nationalities
-  if (any(is.na(data_raw$is_foreigner))) {
+  if (anyNA(data_raw$is_foreigner)) {
     
     cli::cli_alert_warning(paste0("Found {.val {length(which(is.na(data_raw$is_foreigner)))}} entries in raw data lacking a nationality ({.val {NA}}). Please ",
                                   "double-check raw data from {.val {ballot_date}}."))
@@ -2601,14 +2600,14 @@ convert_canton_names <- function(cantons) {
                          table = e_voting_cantons$canton_short)
     
     if (!is.na(long_match)) {
-      
       converted_names %<>% c(e_voting_cantons$canton_short[long_match])
       
     } else if (!is.na(short_match)) {
-      
       converted_names %<>% c(e_voting_cantons$canton[short_match])
       
-    } else cli::cli_abort("{.val {canton_name}} is not a valid e-voting canton.")
+    } else {
+      cli::cli_abort("{.val {canton_name}} is not a valid e-voting canton.")
+    }
   }
   
   converted_names
@@ -2672,10 +2671,10 @@ read_raw_data <- function(canton = c("Bern", "Geneva", "Neuchatel"),
   pkgpins::with_cache(expr = {
     
     switch(EXPR = canton,
-           "Bern" = read_raw_data_bern(ballot_date = ballot_date),
-           "Geneva" = read_raw_data_geneva(ballot_date = ballot_date,
-                                           specific_datasets = specific_datasets),
-           "Neuchatel" = read_raw_data_neuchatel(ballot_date = ballot_date))
+           Bern = read_raw_data_bern(ballot_date = ballot_date),
+           Geneva = read_raw_data_geneva(ballot_date = ballot_date,
+                                         specific_datasets = specific_datasets),
+           Neuchatel = read_raw_data_neuchatel(ballot_date = ballot_date))
   },
   pkg = this_pkg,  
   from_fn = "read_raw_data",
@@ -2707,10 +2706,10 @@ ballot_dates_federal <- function(source = c("Neuchatel", "Zurich"),
   pkgpins::with_cache(expr = {
     
     result <- switch(EXPR = source,
-                     "Neuchatel" =
+                     Neuchatel =
                        ballot_dates_federal_neuchatel(exclude_counterproposals = exclude_counterproposals),
-                     "Zurich" =
-                       get_zurich_referendum_dates(exclude_counterproposals = exclude_counterproposals) %>%
+                     Zurich =
+                       get_zurich_rfrnd_dates(exclude_counterproposals = exclude_counterproposals) %>%
                        dplyr::filter(level == "federal") %>%
                        dplyr::select(ballot_date, subject) %>%
                        dplyr::mutate(ballot_date,
@@ -2765,15 +2764,15 @@ ballot_dates_cantonal <- function(cantons = c("Geneva", "Neuchatel", "Zurich"),
       # print warning ...
       switch(EXPR = canton,
              # ... about missing ZH election dates
-             "Zurich" = cli::cli_alert_warning(paste0("For the canton of {.val {canton}} only referendum dates can be scraped. The cantonal election dates ",
+             Zurich = cli::cli_alert_warning(paste0("For the canton of {.val {canton}} only referendum dates can be scraped. The cantonal election dates ",
                                                       "have to be gathered by hand.")))
       
       if (canton %in% c("Neuchatel", "Zurich")) {
         
         ballot_dates <-
           switch(EXPR = canton,
-                 "Geneva" =
-                   get_geneva_referendum_dates(exclude_counterproposals = exclude_counterproposals) %>%
+                 Geneva =
+                   get_geneva_rfrnd_dates(exclude_counterproposals = exclude_counterproposals) %>%
                    dplyr::filter(level == "cantonal") %>%
                    dplyr::mutate(ballot_date,
                                  subject,
@@ -2786,11 +2785,11 @@ ballot_dates_cantonal <- function(cantons = c("Geneva", "Neuchatel", "Zurich"),
                                                     is_election = TRUE,
                                                     .keep = "none")) %>%
                    dplyr::mutate(canton = "Geneva"),
-                 "Neuchatel" =
+                 Neuchatel =
                    get_neuchatel_cantonal_ballot_dates(exclude_counterproposals = exclude_counterproposals) %>%
                    dplyr::mutate(canton = "Neuchatel"),
-                 "Zurich" =
-                   get_zurich_referendum_dates(exclude_counterproposals = exclude_counterproposals) %>%
+                 Zurich =
+                   get_zurich_rfrnd_dates(exclude_counterproposals = exclude_counterproposals) %>%
                    dplyr::filter(level == "cantonal") %>%
                    dplyr::mutate(canton = "Zurich",
                                  is_election = FALSE) %>%
@@ -2840,8 +2839,8 @@ ballot_dates_municipal <- function(cantons = c("Geneva", "Neuchatel", "Zurich"),
       ballot_dates <-
         switch(EXPR = canton,
                
-               "Geneva" =
-                 get_geneva_referendum_dates(exclude_counterproposals = exclude_counterproposals) %>%
+               Geneva =
+                 get_geneva_rfrnd_dates(exclude_counterproposals = exclude_counterproposals) %>%
                  dplyr::filter(level == "municipal") %>%
                  dplyr::mutate(ballot_date,
                                municipality,
@@ -2856,11 +2855,11 @@ ballot_dates_municipal <- function(cantons = c("Geneva", "Neuchatel", "Zurich"),
                                                   .keep = "none")) %>%
                  dplyr::mutate(canton = "Geneva"),
                
-               "Neuchatel" =
+               Neuchatel =
                  get_neuchatel_municipal_ballot_dates(exclude_counterproposals = exclude_counterproposals) %>%
                  dplyr::mutate(canton = "Neuchatel"),
                
-               "Zurich" =
+               Zurich =
                  get_zurich_municipal_ballot_dates(exclude_counterproposals = exclude_counterproposals) %>%
                  dplyr::mutate(canton = "Zurich")) %>%
         dplyr::select(ballot_date, canton, municipality, is_election, subject) %>%

@@ -14,7 +14,7 @@ License: AGPL (>= 3)
 URL: https://gitlab.com/zdaarau/rpkgs/swissevote
 BugReports: https://gitlab.com/zdaarau/rpkgs/swissevote/issues
 Depends: 
-    R (>= 4.1)
+    R (>= 4.4)
 Imports: 
     checkmate (>= 2.0.0),
     cli (>= 3.3.0),
@@ -47,4 +47,4 @@ Remotes:
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1.9000

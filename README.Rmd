@@ -7,13 +7,39 @@ output: pal::gitlab_document
 #| include: false
 
 knitr::opts_knit$set(root.dir = getwd())
+
+library(rlang,
+        include.only = "%|%")
+library(magrittr,
+        include.only = c("%>%", "%<>%", "%T>%", "%!>%", "%$%"))
 ```
 
 # `r pal::desc_value("Package")`
 
-`r paste0('[![CRAN Status](https://r-pkg.org/badges/version/', pal::desc_value(key = "Package"), ')](https://cran.r-project.org/package=', pal::desc_value(key = "Package"), '){.pkgdown-release}')`
+```{r}
+#| label: description
+#| results: asis
+#| echo: false
 
-`r pal::desc_value("Description")`
+pal::cat_lines(paste0("[![CRAN Status](https://r-pkg.org/badges/version/", pal::desc_value(key = "Package"), ")](https://cran.r-project.org/package=",
+                      pal::desc_value(key = "Package"), "){.pkgdown-release}"),
+               "",
+               pal::desc_value("Description"))
+```
+
+```{r}
+#| label: documentation
+#| eval: !expr '!isTRUE(getOption("pal.build_readme.is_pkgdown"))'
+#| results: asis
+#| echo: false
+
+pkgsnip::md_snip(id = "pkgdown_notice") %>%
+  paste0("## Documentation\n\n",
+         "[![Netlify Status](https://api.netlify.com/api/v1/badges/ce410db6-b85a-4707-9358-f0d3449398c3/deploy-status)]",
+         "(https://app.netlify.com/sites/swissevote-rpkg-dev/deploys)\n\n",
+         .) |>
+  pal::cat_lines()
+```
 
 ## Details
 
@@ -46,19 +72,6 @@ Time-consuming operations like reading in the raw datasets or scraping ballot da
 [pkgpins](https://pkgpins.rpkg.dev)). The maximum cache age for all affected functions can be set via the package configuration key **`global_max_cache_age`**
 [^1] (defaults to *`r pal::pkg_config_val_default(key = "global_max_cache_age", pkg = "swissevote")`* if unset).
 
-```{r}
-#| label: documentation
-#| eval: !expr '!isTRUE(getOption("pal.build_readme.is_pkgdown"))'
-#| results: asis
-#| echo: false
-pkgsnip::md_snip(id = "pkgdown_notice") %>%
-  paste0("## Documentation\n\n",
-         "[![Netlify Status](https://api.netlify.com/api/v1/badges/ce410db6-b85a-4707-9358-f0d3449398c3/deploy-status)]",
-         "(https://app.netlify.com/sites/swissevote-rpkg-dev/deploys)\n\n",
-         .) %>%
-  pal::cat_lines()
-```
-
 [^1]: Its value must be a valid [lubridate duration](https://lubridate.tidyverse.org/reference/as.duration.html#details) which can be a natural-language string
     like `"2 days 1 minute 30 seconds"` (or short `2d1min30s`).
 
@@ -74,9 +87,17 @@ pkgsnip::md_snip(id = "pkgdown_notice") %>%
 #| eval: !expr isTRUE(getOption("pal.build_readme.is_pkgdown"))
 #| results: asis
 #| echo: false
+
 pkgsnip::md_snip(id = "usage_notice") %>%
-  paste0("## Usage\n\n", .) %>%
+  paste0("## Usage\n\n", .) |>
   pal::cat_lines()
+```
+
+## Package configuration
+
+```{r}
+#| label: pkg-config
+#| child: !expr pkgsnip::snip_path("pkg-config-notice.Rmd")
 ```
 
 ## Development

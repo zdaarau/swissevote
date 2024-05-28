@@ -46,6 +46,17 @@ remotes::install_gitlab(repo = "zdaarau/rpkgs/swissevote")
 
 The (function) reference is found [here](reference).
 
+## Package configuration
+
+Some of swissevote's functionality is controlled via package-specific global configuration which can either be set via [R options](https://rdrr.io/r/base/options.html) or [environment variables](https://en.wikipedia.org/wiki/Environment_variable) (the former take precedence). This configuration includes:
+
+::: table-wide
+  **Description**                                                                                                                                                                                                                                                                                     **R option**                        **Environment variable**              **Default value**
+  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- ----------------------------------- ------------------------------------- -------------------
+  Maximal timespan to preserve the package's [pkgpins](https://pkgpins.rpkg.dev/) cache. Cache entries older than this will be deleted upon package loading.                                                                                                                                          `swissevote.global_max_cache_age`   `R_SWISSEVOTE_GLOBAL_MAX_CACHE_AGE`   `"30 days"`
+  the path to the directory holding the cantonal raw data files (which are not part of this package due to legal restrictions and/or concerns regarding voter privacy); see the section *Raw data files* in the package's [README](https://swissevote.rpkg.dev/#raw-data-files) for further details   `swissevote.path_raw_data`          `R_SWISSEVOTE_PATH_RAW_DATA`          
+:::
+
 ## Development
 
 ### R Markdown format
@@ -84,11 +95,7 @@ This package borrows a lot of the [Tidyverse](https://www.tidyverse.org/) design
 
 -   R source code is *not* split over several files as [suggested by the TSG](https://style.tidyverse.org/package-files.html) but instead is (as far as possible) kept in the single file [`Rmd/swissevote.Rmd`](https://gitlab.com/zdaarau/rpkgs/swissevote/-/tree/master/Rmd/swissevote.Rmd) which is well-structured thanks to its [Markdown support](#r-markdown-format).
 
-As far as possible, these deviations from the TSG plus some additional restrictions are formally specified in the [lintr configuration file](https://github.com/jimhester/lintr#project-configuration) [`.lintr`](.lintr), so lintr can be used right away to check for formatting issues:
-
-``` r
-pkgpurl::lint_rmd()
-```
+As far as possible, these deviations from the TSG plus some additional restrictions are formally specified in [`pkgpurl::default_linters`](https://pkgpurl.rpkg.dev/reference/default_linters), which is (by default) used in [`pkgpurl::lint_rmd()`](https://pkgpurl.rpkg.dev/reference/lint_rmd), which in turn is the recommended way to lint this package.
 
 [^1]: Its value must be a valid [lubridate duration](https://lubridate.tidyverse.org/reference/as.duration.html#details) which can be a natural-language string like `"2 days 1 minute 30 seconds"` (or short `2d1min30s`).
 

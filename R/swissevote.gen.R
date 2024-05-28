@@ -2,7 +2,7 @@
 # See `README.md#r-markdown-format` for more information on the literate programming approach used applying the R Markdown format.
 
 # swissevote: Provides Functions Around the Swiss E-Voting Trial Data Collected by the Centre for Democracy Studies Aarau (ZDA)
-# Copyright (C) 2023 Salim Brüggemann
+# Copyright (C) 2024 Salim Brüggemann
 # 
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free
 # Software Foundation, either version 3 of the License, or any later version.
@@ -217,7 +217,8 @@ ballot_dates_federal_neuchatel <- function(exclude_counterproposals = FALSE) {
     dplyr::summarise(subject = paste0(subject,
                                       collapse = "; "),
                      .groups = "drop") %>%
-    dplyr::bind_rows(ballot_dates %>% dplyr::filter(!is_election)) %>%
+    dplyr::bind_rows(dplyr::filter(.data = ballot_dates,
+                                   !is_election)) %>%
     dplyr::arrange(ballot_date, is_election)
 }
 

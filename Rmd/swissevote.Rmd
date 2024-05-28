@@ -265,7 +265,8 @@ ballot_dates_federal_neuchatel <- function(exclude_counterproposals = FALSE) {
     dplyr::summarise(subject = paste0(subject,
                                       collapse = "; "),
                      .groups = "drop") %>%
-    dplyr::bind_rows(ballot_dates %>% dplyr::filter(!is_election)) %>%
+    dplyr::bind_rows(dplyr::filter(.data = ballot_dates,
+                                   !is_election)) %>%
     dplyr::arrange(ballot_date, is_election)
 }
 ```

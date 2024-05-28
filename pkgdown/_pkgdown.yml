@@ -15,7 +15,7 @@ template:
     twitter:
       card: summary
       creator: '@2BSalim'
-url: https://pal.rpkg.dev
+url: https://swissevote.rpkg.dev
 reference:
 - contents: merge_municipalities
 - title: Utilities

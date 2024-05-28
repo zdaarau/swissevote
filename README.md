@@ -8,7 +8,7 @@ swissevote can parse cantonal voting register data, scrape authority websites fo
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/ce410db6-b85a-4707-9358-f0d3449398c3/deploy-status)](https://app.netlify.com/sites/swissevote-rpkg-dev/deploys)
 
-The documentation of this package is found [here](https://pal.rpkg.dev).
+The documentation of this package is found [here](https://swissevote.rpkg.dev).
 
 ## Details
 

@@ -39,9 +39,11 @@ Imports:
     xml2 (>= 1.3.2)
 Suggests: 
     assertr (>= 2.7),
+    pkgdown.tpl (>= 0.0.9000),
     pkgsnip (>= 0.0.9037)
 Remotes:
     gitlab::rpkg.dev/pal,
+    gitlab::rpkg.dev/pkgdown.tpl,
     gitlab::rpkg.dev/pkgpins,
     gitlab::rpkg.dev/swissmuni
 Encoding: UTF-8

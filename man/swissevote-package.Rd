@@ -21,6 +21,7 @@ Some of swissevote's functionality is controlled via package-specific global con
 \seealso{
 Useful links:
 \itemize{
+  \item \url{https://swissevote.rpkg.dev}
   \item \url{https://gitlab.com/zdaarau/rpkgs/swissevote}
   \item Report bugs at \url{https://gitlab.com/zdaarau/rpkgs/swissevote/issues}
 }

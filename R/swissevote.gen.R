@@ -27,7 +27,6 @@ utils::globalVariables(names = c(".",
                                  "matches",
                                  "starts_with",
                                  # other
-                                 "aaData",
                                  "Abstimmungs_Datum",
                                  "Abstimmungs_Text",
                                  "agerevolu",
@@ -89,7 +88,6 @@ utils::globalVariables(names = c(".",
                                  "name",
                                  "Name_Politische_Ebene",
                                  "norefnet",
-                                 "notes",
                                  "nr_of_cantonal_referendums",
                                  "nr_of_federal_referendums",
                                  "nr_of_municipal_referendums",
@@ -1420,8 +1418,8 @@ get_geneva_municipal_election_dates <- function() {
 get_zurich_rfrnd_dates <- function(exclude_counterproposals = FALSE) {
   
   rfrnd_dates <-
-    jsonlite::fromJSON(txt = "https://www.web.statistik.zh.ch/cms_abstimmungsarchiv/includes/ajax_get_vorlagen.php") %$%
-    aaData %>%
+    jsonlite::fromJSON(txt = "https://www.web.statistik.zh.ch/cms_abstimmungsarchiv/includes/ajax_get_vorlagen.php") |>
+    purrr::chuck("aaData") %>%
     magrittr::set_colnames(paste0("V", seq_len(ncol(.)))) %>%
     tibble::as_tibble() %>%
     dplyr::mutate(id = as.integer(V1),
@@ -1916,8 +1914,8 @@ merge_municipalities_by_canton_date <- function(data_canton_date,
   mutation_nrs <-
     mutations_relevant %>%
     dplyr::filter(InitialCode %in% intersect(mutations_relevant$InitialCode,
-                                             data_canton_date$municipality_code)) %$%
-    MutationNumber %>%
+                                             data_canton_date$municipality_code)) |>
+    dplyr::pull("MutationNumber") %>%
     unique()
   
   for (mutation_nr in mutation_nrs) {
@@ -2114,8 +2112,8 @@ read_raw_data_geneva <- function(ballot_date,
   filenames <-
     metadata_geneva_raw_datasets %>%
     dplyr::filter(ballot_date == !!ballot_date
-                  & is_e_voting_available) %$%
-    filename
+                  & is_e_voting_available) |>
+    dplyr::pull("filename")
   
   # abort if all files are missing
   if (length(filenames) == 0L) {
@@ -2129,8 +2127,8 @@ read_raw_data_geneva <- function(ballot_date,
     na_notes <-
       metadata_geneva_raw_datasets %>%
       dplyr::filter(ballot_date == !!ballot_date
-                    & is_e_voting_available) %$%
-      notes %>%
+                    & is_e_voting_available) |>
+      dplyr::pull("notes") %>%
       dplyr::first() %>%
       magrittr::extract(!is.na(.))
     
@@ -2395,8 +2393,8 @@ read_raw_dataset_geneva <- function(filename,
     dplyr::group_by(municipality_code_2_digits) %>%
     dplyr::summarise(n = dplyr::n(),
                      .groups = "drop") %>%
-    dplyr::filter(n == 1L) %$%
-    municipality_code_2_digits %>%
+    dplyr::filter(n == 1L) |>
+    dplyr::pull("municipality_code_2_digits") %>%
     magrittr::is_in(data_raw$municipality_code_2_digits, .) %>%
     which()
   
@@ -2639,8 +2637,8 @@ ballot_dates_raw_data <- function(canton = c("Bern", "Geneva", "Neuchatel")) {
     
     result <-
       metadata_geneva_raw_datasets %>%
-      dplyr::filter(filename %in% result) %$%
-      ballot_date %>%
+      dplyr::filter(filename %in% result) |>
+      dplyr::pull("ballot_date") %>%
       unique()
   }
   

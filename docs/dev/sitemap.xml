@@ -1,54 +1,20 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://swissevote.rpkg.dev/dev/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>https://swissevote.rpkg.dev/dev/TODO.html</loc>
-  </url>
-  <url>
-    <loc>https://swissevote.rpkg.dev/dev/authors.html</loc>
-  </url>
-  <url>
-    <loc>https://swissevote.rpkg.dev/dev/index.html</loc>
-  </url>
-  <url>
-    <loc>https://swissevote.rpkg.dev/dev/reference/ballot_dates_cantonal.html</loc>
-  </url>
-  <url>
-    <loc>https://swissevote.rpkg.dev/dev/reference/ballot_dates_federal.html</loc>
-  </url>
-  <url>
-    <loc>https://swissevote.rpkg.dev/dev/reference/ballot_dates_municipal.html</loc>
-  </url>
-  <url>
-    <loc>https://swissevote.rpkg.dev/dev/reference/ballot_dates_raw_data.html</loc>
-  </url>
-  <url>
-    <loc>https://swissevote.rpkg.dev/dev/reference/convert_canton_names.html</loc>
-  </url>
-  <url>
-    <loc>https://swissevote.rpkg.dev/dev/reference/determine_3_code_combo.html</loc>
-  </url>
-  <url>
-    <loc>https://swissevote.rpkg.dev/dev/reference/determine_7_code_combo.html</loc>
-  </url>
-  <url>
-    <loc>https://swissevote.rpkg.dev/dev/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>https://swissevote.rpkg.dev/dev/reference/merge_municipalities.html</loc>
-  </url>
-  <url>
-    <loc>https://swissevote.rpkg.dev/dev/reference/pkg_config.html</loc>
-  </url>
-  <url>
-    <loc>https://swissevote.rpkg.dev/dev/reference/read_raw_data.html</loc>
-  </url>
-  <url>
-    <loc>https://swissevote.rpkg.dev/dev/reference/read_raw_data_geneva.html</loc>
-  </url>
-  <url>
-    <loc>https://swissevote.rpkg.dev/dev/reference/swissevote-package.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://swissevote.rpkg.dev/dev/LICENSE.html</loc></url>
+<url><loc>https://swissevote.rpkg.dev/dev/TODO.html</loc></url>
+<url><loc>https://swissevote.rpkg.dev/dev/authors.html</loc></url>
+<url><loc>https://swissevote.rpkg.dev/dev/index.html</loc></url>
+<url><loc>https://swissevote.rpkg.dev/dev/reference/ballot_dates_cantonal.html</loc></url>
+<url><loc>https://swissevote.rpkg.dev/dev/reference/ballot_dates_federal.html</loc></url>
+<url><loc>https://swissevote.rpkg.dev/dev/reference/ballot_dates_municipal.html</loc></url>
+<url><loc>https://swissevote.rpkg.dev/dev/reference/ballot_dates_raw_data.html</loc></url>
+<url><loc>https://swissevote.rpkg.dev/dev/reference/convert_canton_names.html</loc></url>
+<url><loc>https://swissevote.rpkg.dev/dev/reference/determine_3_code_combo.html</loc></url>
+<url><loc>https://swissevote.rpkg.dev/dev/reference/determine_7_code_combo.html</loc></url>
+<url><loc>https://swissevote.rpkg.dev/dev/reference/index.html</loc></url>
+<url><loc>https://swissevote.rpkg.dev/dev/reference/merge_municipalities.html</loc></url>
+<url><loc>https://swissevote.rpkg.dev/dev/reference/pkg_config.html</loc></url>
+<url><loc>https://swissevote.rpkg.dev/dev/reference/read_raw_data.html</loc></url>
+<url><loc>https://swissevote.rpkg.dev/dev/reference/read_raw_data_geneva.html</loc></url>
+<url><loc>https://swissevote.rpkg.dev/dev/reference/swissevote-package.html</loc></url>
 </urlset>
+

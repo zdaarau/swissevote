@@ -352,8 +352,8 @@ municipalities <- function(canton = c("Geneva", "Neuchatel", "Zurich")) {
 path_raw_data <- function(...,
                           ext = "") {
   
-  path_raw_data <- pal::pkg_config_val(key = "path_raw_data",
-                                       pkg = this_pkg)
+  path_raw_data <- pal::pkg_config_val(key = "path_raw_data")
+  
   if (is.null(path_raw_data)) {
     cli::cli_abort(message = msg_raw_data_path_unset)
   }

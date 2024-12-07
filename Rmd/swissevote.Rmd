@@ -2447,7 +2447,7 @@ merge_municipalities_helper <- function(rows,
                                         municipality_new,
                                         target_colnames) {
   rows %>%
-    dplyr::summarise(comments = paste0("Retroactively (i.e. synthetically) merged from the municipalities ", pal::prose_ls(municipality), "; ",
+    dplyr::summarise(comments = paste0("Retroactively (i.e. synthetically) merged from the municipalities ", pal::enum_str(municipality), "; ",
                                        paste0(unique(comments),
                                               collapse = "; ")),
                      municipality_code = checkmate::assert_int(municipality_code_new),
